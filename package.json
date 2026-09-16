@@ -1,0 +1,25 @@
+{
+  "name": "vrsoc",
+  "version": "0.1.0",
+  "private": true,
+  "description": "VRSOC — Enterprise SOC Training & Simulation SaaS",
+  "scripts": {
+    "dev": "pnpm --filter @vrsoc/web dev",
+    "build": "pnpm --filter @vrsoc/web build",
+    "start": "pnpm --filter @vrsoc/web start",
+    "lint": "pnpm --filter @vrsoc/web lint",
+    "typecheck": "pnpm -r --stream run typecheck",
+    "test": "pnpm -r --stream run test",
+    "test:e2e": "pnpm --filter @vrsoc/web test:e2e",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.5.2",
+    "typescript": "^5.7.3"
+  },
+  "packageManager": "pnpm@11.24.0",
+  "engines": {
+    "node": ">=18.18.0"
+  }
+}
