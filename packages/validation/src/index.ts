@@ -289,6 +289,48 @@ export const AgentHeartbeatSchema = z.object({
   metadata: z.record(z.unknown()).default({}),
 });
 
+export const FilterAgentsSchema = z.object({
+  search: z.string().optional(),
+  status: z.string().optional(),
+  osType: z.string().optional(),
+  assetGroupId: z.string().optional(),
+  page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(1).max(100).default(10),
+});
+
+export const IsolateAgentSchema = z.object({
+  agentId: z.string().uuid("Invalid agent ID format"),
+  isolate: z.boolean(),
+  reason: z.string().max(255).optional(),
+});
+
+export const UpdateAgentGroupSchema = z.object({
+  assetId: z.string().uuid("Invalid asset ID format"),
+  assetGroupId: z.string().uuid("Invalid asset group ID format").optional().nullable(),
+});
+
+export const SimulateAgentStateSchema = z.object({
+  agentId: z.string().uuid("Invalid agent ID format"),
+  newStatus: AgentStatusSchema,
+  cpuUsagePct: z.number().min(0).max(100).optional(),
+  ramUsagePct: z.number().min(0).max(100).optional(),
+  diskUsagePct: z.number().min(0).max(100).optional(),
+});
+
+export const RegisterEndpointAgentSchema = z.object({
+  hostname: z.string().min(1, "Hostname is required").max(255),
+  displayName: z.string().max(255).optional(),
+  assetType: AssetTypeSchema.default("Endpoint"),
+  osType: OSTypeSchema.default("Windows"),
+  osVersion: z.string().max(128).default("Windows 11 Enterprise"),
+  ipAddress: z.string().max(45).default("10.0.4.100"),
+  macAddress: z.string().max(48).optional(),
+  criticality: SeverityLevelSchema.default("Medium"),
+  assetGroupId: z.string().uuid().optional().nullable(),
+  agentVersion: z.string().max(32).default("1.4.2"),
+  status: AgentStatusSchema.default("Online"),
+});
+
 export const CreateSocIdentitySchema = z.object({
   organizationId: z.string().uuid("Invalid organization ID format"),
   userId: z.string().uuid().optional().nullable(),
@@ -426,6 +468,11 @@ export type CreateAssetGroupInput = z.infer<typeof CreateAssetGroupSchema>;
 export type CreateAssetInput = z.infer<typeof CreateAssetSchema>;
 export type UpdateAssetInput = z.infer<typeof UpdateAssetSchema>;
 export type AgentHeartbeatInput = z.infer<typeof AgentHeartbeatSchema>;
+export type FilterAgentsInput = z.infer<typeof FilterAgentsSchema>;
+export type IsolateAgentInput = z.infer<typeof IsolateAgentSchema>;
+export type UpdateAgentGroupInput = z.infer<typeof UpdateAgentGroupSchema>;
+export type SimulateAgentStateInput = z.infer<typeof SimulateAgentStateSchema>;
+export type RegisterEndpointAgentInput = z.infer<typeof RegisterEndpointAgentSchema>;
 export type CreateSocIdentityInput = z.infer<typeof CreateSocIdentitySchema>;
 export type CreateTelemetryEventInput = z.infer<typeof CreateTelemetryEventSchema>;
 export type IngestLogInput = z.infer<typeof IngestLogSchema>;

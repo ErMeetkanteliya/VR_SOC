@@ -254,6 +254,23 @@ export interface Agent {
   asset?: Asset;
 }
 
+export interface AgentWithAsset extends Agent {
+  asset: Asset;
+}
+
+export interface AgentFleetSummary {
+  totalAgents: number;
+  onlineAgents: number;
+  offlineAgents: number;
+  updatingAgents: number;
+  errorAgents: number;
+  pendingAgents: number;
+  isolatedAgents: number;
+  avgCpuUsagePct: number;
+  avgRamUsagePct: number;
+  avgDiskUsagePct: number;
+}
+
 export interface SocIdentity {
   id: string;
   organization_id: string;

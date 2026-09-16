@@ -71,5 +71,9 @@ export const VRSOC_DESIGN_TOKENS = {
       badge: "bg-purple-500/15 text-purple-400 border border-purple-500/30",
       dot: "bg-purple-500",
     },
+    error: {
+      badge: "bg-red-500/15 text-red-400 border border-red-500/30",
+      dot: "bg-red-500",
+    },
   },
 } as const;

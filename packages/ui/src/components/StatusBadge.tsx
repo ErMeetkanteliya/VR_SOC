@@ -2,7 +2,7 @@ import React from "react";
 import { cn } from "../utils";
 import { VRSOC_DESIGN_TOKENS } from "../tokens";
 
-export type StatusType = "Online" | "Warning" | "Critical" | "Offline" | "Updating" | "Pending";
+export type StatusType = "Online" | "Warning" | "Critical" | "Offline" | "Updating" | "Pending" | "Error";
 
 export interface StatusBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   status: StatusType;
