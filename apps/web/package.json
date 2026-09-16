@@ -13,6 +13,8 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.116.0",
     "@vrsoc/config": "workspace:*",
     "@vrsoc/types": "workspace:*",
     "@vrsoc/ui": "workspace:*",

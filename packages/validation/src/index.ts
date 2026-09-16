@@ -55,3 +55,24 @@ export const DeclareIncidentSchema = z.object({
   leadResponderId: z.string().uuid().optional(),
   affectedAssetIds: z.array(z.string().uuid()).min(1, "Select at least one affected asset"),
 });
+
+// Environment variable validation schemas
+export const ClientEnvSchema = z.object({
+  NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),
+  NEXT_PUBLIC_APP_NAME: z.string().default("VRSOC — Cyber Defense Training"),
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url("Valid Supabase URL required"),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(20, "Valid Supabase anon key required"),
+});
+
+export const ServerEnvSchema = ClientEnvSchema.extend({
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(20, "Valid Supabase service role key required").optional(),
+  VIRUSTOTAL_API_KEY: z.string().optional(),
+  ABUSEIPDB_API_KEY: z.string().optional(),
+  SHODAN_API_KEY: z.string().optional(),
+  GEMINI_API_KEY: z.string().optional(),
+  ANTHROPIC_API_KEY: z.string().optional(),
+});
+
+export type ClientEnv = z.infer<typeof ClientEnvSchema>;
+export type ServerEnv = z.infer<typeof ServerEnvSchema>;
+
