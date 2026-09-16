@@ -30,6 +30,8 @@ import {
   ErrorState,
   Toast,
 } from "@vrsoc/ui";
+import { OrganizationSwitcher } from "@/components/tenant/OrganizationSwitcher";
+import type { Organization, Membership } from "@vrsoc/types";
 import {
   ShieldAlert,
   Server,
@@ -171,6 +173,45 @@ export default function DesignSystemShowcasePage() {
     },
   ];
 
+  const demoOrg: Organization = {
+    id: "org-demo-01",
+    name: "Cyber Defense Academy",
+    slug: "cda-enterprise",
+    status: "active",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  const demoMemberships: Membership[] = [
+    {
+      id: "mem-01",
+      user_id: "usr-01",
+      organization_id: "org-demo-01",
+      role: "Super Admin",
+      status: "active",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      organization: demoOrg,
+    },
+    {
+      id: "mem-02",
+      user_id: "usr-01",
+      organization_id: "org-demo-02",
+      role: "SOC Analyst",
+      status: "active",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      organization: {
+        id: "org-demo-02",
+        name: "FinTech Global SOC",
+        slug: "fintech-soc",
+        status: "active",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+    },
+  ];
+
   return (
     <AppShell currentPath="/design-system" commandItems={commandItems}>
       <div className="space-y-8 max-w-7xl mx-auto pb-16">
@@ -179,6 +220,7 @@ export default function DesignSystemShowcasePage() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <Badge variant="burgundy">Design System</Badge>
+              <Badge variant="burgundy">Multi-Tenant Enabled</Badge>
               <span className="text-xs font-mono text-white/40">Base44 Visual Parity Specification</span>
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
@@ -190,6 +232,10 @@ export default function DesignSystemShowcasePage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <OrganizationSwitcher
+              currentOrganization={demoOrg}
+              memberships={demoMemberships}
+            />
             <Button variant="outline" size="sm" onClick={() => setIsModalOpen(true)}>
               Launch Modal
             </Button>

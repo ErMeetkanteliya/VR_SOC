@@ -8,7 +8,7 @@ test.describe("Phase 05 — Design System Showcase", () => {
   test("renders design system header and layout shell", async ({ page }) => {
     await expect(page.getByRole("heading", { name: "VRSOC Component Library Showcase" })).toBeVisible();
     await expect(page.getByText("Base44 Visual Parity Specification")).toBeVisible();
-    await expect(page.getByText("Cyber Defense Academy")).toBeVisible();
+    await expect(page.getByText("Cyber Defense Academy").first()).toBeVisible();
   });
 
   test("renders metric cards and severity badges", async ({ page }) => {

@@ -11,6 +11,10 @@ export const UserRoleSchema = z.enum([
   "Viewer",
 ]);
 
+export const MembershipStatusSchema = z.enum(["active", "inactive", "revoked", "pending"]);
+
+export const OrganizationStatusSchema = z.enum(["active", "suspended", "archived"]);
+
 export const SeverityLevelSchema = z.enum([
   "Critical",
   "High",
@@ -65,6 +69,28 @@ export const VerifyOtpSchema = z.object({
   type: z.enum(["signup", "recovery", "email", "magiclink"]).default("signup"),
 });
 
+// Multi-Tenancy Validation Schemas
+export const CreateOrganizationSchema = z.object({
+  name: z.string().min(2, "Organization name must be at least 2 characters").max(64, "Organization name too long"),
+  slug: z
+    .string()
+    .min(2, "Slug must be at least 2 characters")
+    .max(48, "Slug too long")
+    .regex(/^[a-z0-9-]+$/, "Slug must contain only lowercase letters, numbers, and hyphens"),
+});
+
+export const InviteMemberSchema = z.object({
+  organizationId: z.string().uuid("Invalid organization ID format"),
+  email: z.string().email("Invalid email address"),
+  role: UserRoleSchema.default("SOC Analyst"),
+});
+
+export const CreateTeamSchema = z.object({
+  organizationId: z.string().uuid("Invalid organization ID format"),
+  name: z.string().min(2, "Team name must be at least 2 characters").max(64),
+  description: z.string().max(255).optional(),
+});
+
 export const HostIsolationSchema = z.object({
   assetId: z.string().uuid("Invalid asset ID format"),
   reason: z.string().min(5, "Isolation reason must be at least 5 characters"),
@@ -100,5 +126,8 @@ export type RegisterInput = z.infer<typeof RegisterSchema>;
 export type ForgotPasswordInput = z.infer<typeof ForgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof ResetPasswordSchema>;
 export type VerifyOtpInput = z.infer<typeof VerifyOtpSchema>;
+export type CreateOrganizationInput = z.infer<typeof CreateOrganizationSchema>;
+export type InviteMemberInput = z.infer<typeof InviteMemberSchema>;
+export type CreateTeamInput = z.infer<typeof CreateTeamSchema>;
 export type ClientEnv = z.infer<typeof ClientEnvSchema>;
 export type ServerEnv = z.infer<typeof ServerEnvSchema>;

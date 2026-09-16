@@ -14,7 +14,7 @@ describe("VRSOC Monorepo Foundation Smoke Tests", () => {
       id: "550e8400-e29b-41d4-a716-446655440000",
       name: "Cyber Defense Academy",
       slug: "cda",
-      billing_tier: "enterprise",
+      status: "active",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };

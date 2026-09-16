@@ -12,7 +12,9 @@ export type UserRole =
   | "Auditor"
   | "Viewer";
 
-export type MembershipStatus = "Active" | "Suspended" | "Invited";
+export type MembershipStatus = "active" | "inactive" | "revoked" | "pending";
+
+export type OrganizationStatus = "active" | "suspended" | "archived";
 
 export type SeverityLevel = "Critical" | "High" | "Medium" | "Low" | "Informational";
 
@@ -39,7 +41,8 @@ export interface Organization {
   id: string;
   name: string;
   slug: string;
-  billing_tier: string;
+  status: OrganizationStatus;
+  created_by?: string;
   created_at: string;
   updated_at: string;
 }
@@ -50,6 +53,7 @@ export interface Profile {
   full_name: string;
   avatar_url?: string;
   created_at: string;
+  updated_at?: string;
 }
 
 export interface Membership {
@@ -58,7 +62,45 @@ export interface Membership {
   user_id: string;
   role: UserRole;
   status: MembershipStatus;
-  joined_at: string;
+  created_at: string;
+  updated_at: string;
+  organization?: Organization;
+  profile?: Profile;
+}
+
+export interface Team {
+  id: string;
+  organization_id: string;
+  name: string;
+  description?: string;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TeamMember {
+  id: string;
+  team_id: string;
+  membership_id: string;
+  created_at: string;
+}
+
+export interface Invitation {
+  id: string;
+  organization_id: string;
+  email: string;
+  role: UserRole;
+  token: string;
+  invited_by?: string;
+  status: "pending" | "accepted" | "revoked" | "expired";
+  expires_at: string;
+  created_at: string;
+}
+
+export interface TenantContext {
+  activeOrganization: Organization | null;
+  userMemberships: Membership[];
+  isLoading: boolean;
 }
 
 export interface Asset {
