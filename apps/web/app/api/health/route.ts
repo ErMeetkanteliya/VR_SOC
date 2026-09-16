@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { VRSOC_CONFIG } from "@vrsoc/config";
 import type { HealthCheckResponse } from "@vrsoc/types";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const healthData: HealthCheckResponse = {
     status: "operational",
