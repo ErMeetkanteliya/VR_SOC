@@ -51,7 +51,11 @@ export function CommandPalette({ isOpen, onClose, items }: CommandPaletteProps) 
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] px-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-100">
-      <div className="w-full max-w-xl bg-[#161616] border border-white/15 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-100 flex flex-col">
+      <div
+        role="dialog"
+        aria-label="Command palette"
+        className="w-full max-w-xl bg-[#161616] border border-white/15 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-100 flex flex-col"
+      >
         {/* Search Input Bar */}
         <div className="flex items-center px-4 py-3.5 border-b border-white/10 gap-3">
           <Search className="w-4 h-4 text-white/40 shrink-0" />

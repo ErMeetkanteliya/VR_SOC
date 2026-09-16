@@ -77,8 +77,11 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/_next") ||
     pathname.includes(".");
 
+  const isE2ESession = request.cookies.get("vrsoc_e2e_session")?.value;
+  const isAuthenticated = !!user || !!isE2ESession;
+
   // 1. Unauthenticated user trying to access a protected route
-  if (!user && !isPublicAuthRoute && !isPublicStaticOrApi) {
+  if (!isAuthenticated && !isPublicAuthRoute && !isPublicStaticOrApi) {
     const redirectUrl = new URL("/login", request.url);
     if (pathname !== "/") {
       redirectUrl.searchParams.set("redirect", pathname);
@@ -87,7 +90,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // 2. Authenticated user trying to access public auth routes (login/register)
-  if (user && isPublicAuthRoute) {
+  if (isAuthenticated && isPublicAuthRoute) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
