@@ -1,0 +1,915 @@
+{
+  "alerts": [
+    {
+      "id": 1,
+      "title": "Brute Force Authentication Attack",
+      "severity": "critical",
+      "risk": 95,
+      "category": "Credential Access",
+      "mitre_tactic": "Credential Access",
+      "mitre_technique": "T1110 - Brute Force",
+      "description": "Multiple failed authentication attempts detected from a single source IP targeting domain controller DC-01. Over 500 login failures within 5 minutes suggest an automated brute force attack.",
+      "affected": "DC-01 (10.0.1.10)",
+      "actions": "1. Block source IP at firewall\n2. Review account lockout policies\n3. Enable multi-factor authentication\n4. Check for successful authentications post-attack"
+    },
+    {
+      "id": 2,
+      "title": "Encoded PowerShell Execution",
+      "severity": "critical",
+      "risk": 92,
+      "category": "Execution",
+      "mitre_tactic": "Execution",
+      "mitre_technique": "T1059.001 - PowerShell",
+      "description": "Base64-encoded PowerShell command detected executing on endpoint WS-045. Encoded commands are commonly used by attackers to evade detection and download additional payloads.",
+      "affected": "WS-045 (10.0.2.45)",
+      "actions": "1. Isolate endpoint immediately\n2. Decode and analyze the command\n3. Check for persistence mechanisms\n4. Review parent process chain"
+    },
+    {
+      "id": 3,
+      "title": "Privilege Escalation via Token Manipulation",
+      "severity": "high",
+      "risk": 88,
+      "category": "Privilege Escalation",
+      "mitre_tactic": "Privilege Escalation",
+      "mitre_technique": "T1134 - Access Token Manipulation",
+      "description": "A standard user process was observed manipulating access tokens to obtain SYSTEM-level privileges on endpoint WS-023.",
+      "affected": "WS-023 (10.0.2.23)",
+      "actions": "1. Kill suspicious processes\n2. Audit user account permissions\n3. Review scheduled tasks\n4. Check for additional compromised endpoints"
+    },
+    {
+      "id": 4,
+      "title": "Registry Persistence Mechanism Created",
+      "severity": "high",
+      "risk": 85,
+      "category": "Persistence",
+      "mitre_tactic": "Persistence",
+      "mitre_technique": "T1547.001 - Registry Run Keys",
+      "description": "New registry run key added to HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run pointing to a suspicious executable in a temporary directory.",
+      "affected": "WS-067 (10.0.2.67)",
+      "actions": "1. Remove malicious registry key\n2. Quarantine referenced executable\n3. Scan for additional persistence\n4. Check file hash against threat intelligence"
+    },
+    {
+      "id": 5,
+      "title": "DNS Tunneling Detected",
+      "severity": "high",
+      "risk": 82,
+      "category": "Exfiltration",
+      "mitre_tactic": "Command and Control",
+      "mitre_technique": "T1071.004 - DNS",
+      "description": "Abnormal DNS query patterns detected with high-entropy subdomain queries suggesting DNS tunneling for data exfiltration or C2 communication.",
+      "affected": "SRV-08 (10.0.3.8)",
+      "actions": "1. Block suspicious DNS domains\n2. Review DNS logs for data patterns\n3. Isolate affected server\n4. Check for malware presence"
+    },
+    {
+      "id": 6,
+      "title": "Suspicious Network Port Scan",
+      "severity": "medium",
+      "risk": 65,
+      "category": "Discovery",
+      "mitre_tactic": "Discovery",
+      "mitre_technique": "T1046 - Network Service Discovery",
+      "description": "Horizontal port scanning activity detected from internal host WS-112, targeting multiple servers across different subnets on common service ports.",
+      "affected": "WS-112 (10.0.2.112)",
+      "actions": "1. Investigate source endpoint\n2. Review network segmentation\n3. Check for lateral movement\n4. Verify if authorized scan"
+    },
+    {
+      "id": 7,
+      "title": "Unusual Login Time Anomaly",
+      "severity": "medium",
+      "risk": 55,
+      "category": "Initial Access",
+      "mitre_tactic": "Initial Access",
+      "mitre_technique": "T1078 - Valid Accounts",
+      "description": "User john.smith authenticated at 03:42 AM, which is outside their normal working hours (8 AM - 6 PM). The login originated from an unusual geographic location.",
+      "affected": "VPN-GW (10.0.0.1)",
+      "actions": "1. Contact user to verify login\n2. Review VPN session details\n3. Check for impossible travel\n4. Review accessed resources"
+    },
+    {
+      "id": 8,
+      "title": "Unauthorized USB Mass Storage",
+      "severity": "low",
+      "risk": 35,
+      "category": "Collection",
+      "mitre_tactic": "Collection",
+      "mitre_technique": "T1025 - Data from Removable Media",
+      "description": "USB mass storage device connected to endpoint WS-089 which violates the organization's removable media policy.",
+      "affected": "WS-089 (10.0.2.89)",
+      "actions": "1. Review USB device details\n2. Check files accessed/copied\n3. Remind user of USB policy\n4. Consider DLP enforcement"
+    }
+  ],
+  "mitre_tactics": [
+    {
+      "id": "TA0001",
+      "name": "Initial Access",
+      "coverage": 78,
+      "techniques": [
+        {
+          "id": "T1190",
+          "name": "Exploit Public-Facing Application",
+          "covered": true,
+          "desc": "Adversaries may attempt to take advantage of a weakness in an Internet-facing computer."
+        },
+        {
+          "id": "T1566",
+          "name": "Phishing",
+          "covered": true,
+          "desc": "Adversaries may send phishing messages to gain access to victim systems."
+        },
+        {
+          "id": "T1078",
+          "name": "Valid Accounts",
+          "covered": true,
+          "desc": "Adversaries may obtain and abuse credentials of existing accounts."
+        },
+        {
+          "id": "T1133",
+          "name": "External Remote Services",
+          "covered": false,
+          "desc": "Adversaries may leverage external-facing remote services to initially access a network."
+        }
+      ]
+    },
+    {
+      "id": "TA0002",
+      "name": "Execution",
+      "coverage": 85,
+      "techniques": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "covered": true,
+          "desc": "Adversaries may abuse command and script interpreters to execute commands."
+        },
+        {
+          "id": "T1059.001",
+          "name": "PowerShell",
+          "covered": true,
+          "desc": "Adversaries may abuse PowerShell commands and scripts for execution."
+        },
+        {
+          "id": "T1204",
+          "name": "User Execution",
+          "covered": true,
+          "desc": "An adversary may rely upon specific actions by a user in order to gain execution."
+        },
+        {
+          "id": "T1053",
+          "name": "Scheduled Task/Job",
+          "covered": true,
+          "desc": "Adversaries may abuse task scheduling functionality to facilitate initial or recurring execution."
+        }
+      ]
+    },
+    {
+      "id": "TA0003",
+      "name": "Persistence",
+      "coverage": 62,
+      "techniques": [
+        {
+          "id": "T1547",
+          "name": "Boot or Logon Autostart Execution",
+          "covered": true,
+          "desc": "Adversaries may configure system settings to automatically execute a program during system boot."
+        },
+        {
+          "id": "T1136",
+          "name": "Create Account",
+          "covered": true,
+          "desc": "Adversaries may create an account to maintain access to victim systems."
+        },
+        {
+          "id": "T1543",
+          "name": "Create or Modify System Process",
+          "covered": false,
+          "desc": "Adversaries may create or modify system-level processes to repeatedly execute malicious payloads."
+        },
+        {
+          "id": "T1098",
+          "name": "Account Manipulation",
+          "covered": false,
+          "desc": "Adversaries may manipulate accounts to maintain access to victim systems."
+        }
+      ]
+    },
+    {
+      "id": "TA0004",
+      "name": "Privilege Escalation",
+      "coverage": 71,
+      "techniques": [
+        {
+          "id": "T1134",
+          "name": "Access Token Manipulation",
+          "covered": true,
+          "desc": "Adversaries may modify access tokens to operate under different user contexts."
+        },
+        {
+          "id": "T1068",
+          "name": "Exploitation for Privilege Escalation",
+          "covered": true,
+          "desc": "Adversaries may exploit software vulnerabilities to elevate privileges."
+        },
+        {
+          "id": "T1055",
+          "name": "Process Injection",
+          "covered": false,
+          "desc": "Adversaries may inject code into processes in order to evade process-based defenses."
+        }
+      ]
+    },
+    {
+      "id": "TA0005",
+      "name": "Defense Evasion",
+      "coverage": 54,
+      "techniques": [
+        {
+          "id": "T1070",
+          "name": "Indicator Removal",
+          "covered": true,
+          "desc": "Adversaries may delete or modify artifacts to remove evidence of their presence."
+        },
+        {
+          "id": "T1036",
+          "name": "Masquerading",
+          "covered": false,
+          "desc": "Adversaries may attempt to manipulate features of their artifacts to make them appear legitimate."
+        },
+        {
+          "id": "T1027",
+          "name": "Obfuscated Files or Information",
+          "covered": true,
+          "desc": "Adversaries may obfuscate content to impede detection."
+        }
+      ]
+    },
+    {
+      "id": "TA0006",
+      "name": "Credential Access",
+      "coverage": 68,
+      "techniques": [
+        {
+          "id": "T1110",
+          "name": "Brute Force",
+          "covered": true,
+          "desc": "Adversaries may use brute force techniques to gain access to accounts."
+        },
+        {
+          "id": "T1003",
+          "name": "OS Credential Dumping",
+          "covered": true,
+          "desc": "Adversaries may attempt to dump credentials to obtain account login information."
+        },
+        {
+          "id": "T1558",
+          "name": "Steal or Forge Kerberos Tickets",
+          "covered": false,
+          "desc": "Adversaries may attempt to subvert Kerberos authentication."
+        }
+      ]
+    },
+    {
+      "id": "TA0007",
+      "name": "Discovery",
+      "coverage": 82,
+      "techniques": [
+        {
+          "id": "T1046",
+          "name": "Network Service Discovery",
+          "covered": true,
+          "desc": "Adversaries may attempt to get a listing of services running on remote hosts."
+        },
+        {
+          "id": "T1087",
+          "name": "Account Discovery",
+          "covered": true,
+          "desc": "Adversaries may attempt to get a listing of accounts on a system or within an environment."
+        },
+        {
+          "id": "T1082",
+          "name": "System Information Discovery",
+          "covered": true,
+          "desc": "An adversary may attempt to get detailed information about the operating system and hardware."
+        }
+      ]
+    },
+    {
+      "id": "TA0011",
+      "name": "Command and Control",
+      "coverage": 59,
+      "techniques": [
+        {
+          "id": "T1071",
+          "name": "Application Layer Protocol",
+          "covered": true,
+          "desc": "Adversaries may communicate using application layer protocols to avoid detection."
+        },
+        {
+          "id": "T1071.004",
+          "name": "DNS",
+          "covered": true,
+          "desc": "Adversaries may communicate using the DNS application layer protocol to avoid detection."
+        },
+        {
+          "id": "T1105",
+          "name": "Ingress Tool Transfer",
+          "covered": false,
+          "desc": "Adversaries may transfer tools or other files from an external system."
+        }
+      ]
+    }
+  ],
+  "playbooks": [
+    {
+      "name": "Brute Force Response",
+      "category": "Brute Force",
+      "description": "Automatically blocks source IPs after threshold of failed authentications, disables targeted accounts, and notifies SOC.",
+      "mitre_mapping": "T1110 - Brute Force",
+      "severity": "high",
+      "estimated_runtime": "2-4s",
+      "automation_percent": 95,
+      "approval_required": false,
+      "steps": [
+        "Detect threshold",
+        "Enrich source IP",
+        "Block at firewall",
+        "Disable targeted accounts",
+        "Notify SOC",
+        "Create case"
+      ]
+    },
+    {
+      "name": "Malware Containment",
+      "category": "Malware",
+      "description": "Isolates infected endpoint, quarantines malicious files, collects forensic artifacts, and creates remediation case.",
+      "mitre_mapping": "T1059, T1547",
+      "severity": "critical",
+      "estimated_runtime": "5-8s",
+      "automation_percent": 88,
+      "approval_required": true,
+      "steps": [
+        "Detect malware",
+        "Isolate endpoint",
+        "Quarantine files",
+        "Collect memory dump",
+        "Collect registry",
+        "Create case"
+      ]
+    },
+    {
+      "name": "Ransomware Defense",
+      "category": "Ransomware",
+      "description": "Detects encryption activity, isolates affected hosts, blocks C2 domains, and triggers mass isolation if spreading.",
+      "mitre_mapping": "T1486 - Data Encrypted",
+      "severity": "critical",
+      "estimated_runtime": "3-6s",
+      "automation_percent": 82,
+      "approval_required": true,
+      "steps": [
+        "Detect encryption",
+        "Isolate host",
+        "Block C2 domains",
+        "Block file hashes",
+        "Notify IR team",
+        "Create case"
+      ]
+    },
+    {
+      "name": "Phishing Response",
+      "category": "Phishing",
+      "description": "Extracts URLs and attachments from phishing emails, blocks malicious domains, deletes email from mailboxes.",
+      "mitre_mapping": "T1566 - Phishing",
+      "severity": "high",
+      "estimated_runtime": "4-7s",
+      "automation_percent": 90,
+      "approval_required": false,
+      "steps": [
+        "Extract URLs",
+        "Enrich URLs",
+        "Block domains",
+        "Delete emails",
+        "Notify affected users",
+        "Create case"
+      ]
+    },
+    {
+      "name": "Impossible Travel",
+      "category": "Impossible Travel",
+      "description": "Detects logins from geographically impossible locations, resets user password, revokes active sessions.",
+      "mitre_mapping": "T1078 - Valid Accounts",
+      "severity": "high",
+      "estimated_runtime": "2-3s",
+      "automation_percent": 92,
+      "approval_required": false,
+      "steps": [
+        "Detect impossible travel",
+        "Verify GeoIP",
+        "Reset password",
+        "Revoke sessions",
+        "Notify user",
+        "Create case"
+      ]
+    },
+    {
+      "name": "Credential Stuffing",
+      "category": "Credential Stuffing",
+      "description": "Identifies credential stuffing patterns, enforces MFA challenge, blocks source IPs, resets compromised accounts.",
+      "mitre_mapping": "T1110.004 - Credential Stuffing",
+      "severity": "high",
+      "estimated_runtime": "3-5s",
+      "automation_percent": 89,
+      "approval_required": false,
+      "steps": [
+        "Detect stuffing pattern",
+        "Enforce MFA",
+        "Block source IPs",
+        "Reset compromised accounts",
+        "Notify SOC",
+        "Create case"
+      ]
+    },
+    {
+      "name": "Password Spray",
+      "category": "Password Spray",
+      "description": "Detects password spray attacks across multiple accounts, locks targeted accounts, blocks source infrastructure.",
+      "mitre_mapping": "T1110.003 - Password Spraying",
+      "severity": "high",
+      "estimated_runtime": "3-5s",
+      "automation_percent": 87,
+      "approval_required": false,
+      "steps": [
+        "Detect spray pattern",
+        "Lock accounts",
+        "Block source IPs",
+        "Enforce MFA",
+        "Notify SOC",
+        "Create case"
+      ]
+    },
+    {
+      "name": "Privilege Escalation",
+      "category": "Privilege Escalation",
+      "description": "Detects token manipulation and privilege escalation attempts, kills malicious processes, isolates endpoint.",
+      "mitre_mapping": "T1134 - Token Manipulation",
+      "severity": "critical",
+      "estimated_runtime": "4-6s",
+      "automation_percent": 85,
+      "approval_required": true,
+      "steps": [
+        "Detect priv escalation",
+        "Kill processes",
+        "Isolate endpoint",
+        "Audit permissions",
+        "Notify IR team",
+        "Create case"
+      ]
+    },
+    {
+      "name": "Lateral Movement",
+      "category": "Lateral Movement",
+      "description": "Detects lateral movement via SMB/WMI/RDP, isolates affected hosts, blocks internal connections, collects evidence.",
+      "mitre_mapping": "T1021 - Remote Services",
+      "severity": "critical",
+      "estimated_runtime": "5-8s",
+      "automation_percent": 80,
+      "approval_required": true,
+      "steps": [
+        "Detect lateral movement",
+        "Isolate hosts",
+        "Block internal connections",
+        "Collect network logs",
+        "Notify IR team",
+        "Create case"
+      ]
+    },
+    {
+      "name": "PowerShell Attack",
+      "category": "PowerShell Attack",
+      "description": "Detects encoded/suspicious PowerShell execution, isolates endpoint, analyzes script logs, quarantines payloads.",
+      "mitre_mapping": "T1059.001 - PowerShell",
+      "severity": "critical",
+      "estimated_runtime": "3-5s",
+      "automation_percent": 91,
+      "approval_required": true,
+      "steps": [
+        "Detect suspicious PS",
+        "Isolate endpoint",
+        "Analyze script logs",
+        "Quarantine payloads",
+        "Check persistence",
+        "Create case"
+      ]
+    },
+    {
+      "name": "USB Malware",
+      "category": "USB Malware",
+      "description": "Detects malicious USB mass storage, blocks device, scans files, collects USB activity logs.",
+      "mitre_mapping": "T1091 - Replication Through Removable Media",
+      "severity": "medium",
+      "estimated_runtime": "2-3s",
+      "automation_percent": 93,
+      "approval_required": false,
+      "steps": [
+        "Detect USB device",
+        "Block device",
+        "Scan files",
+        "Collect USB logs",
+        "Notify user",
+        "Create case"
+      ]
+    },
+    {
+      "name": "Data Exfiltration",
+      "category": "Data Exfiltration",
+      "description": "Detects large outbound data transfers, blocks destination IPs, captures network traffic, notifies DLP team.",
+      "mitre_mapping": "T1041 - Exfiltration Over C2",
+      "severity": "critical",
+      "estimated_runtime": "4-6s",
+      "automation_percent": 78,
+      "approval_required": true,
+      "steps": [
+        "Detect exfiltration",
+        "Block destination IPs",
+        "Capture traffic",
+        "Collect endpoint logs",
+        "Notify DLP team",
+        "Create case"
+      ]
+    },
+    {
+      "name": "Suspicious Login",
+      "category": "Suspicious Login",
+      "description": "Analyzes anomalous login patterns, challenges with MFA, verifies geo-location, alerts if risk score exceeds threshold.",
+      "mitre_mapping": "T1078 - Valid Accounts",
+      "severity": "medium",
+      "estimated_runtime": "2-3s",
+      "automation_percent": 94,
+      "approval_required": false,
+      "steps": [
+        "Detect anomalous login",
+        "Challenge MFA",
+        "Verify GeoIP",
+        "Calculate risk score",
+        "Notify SOC",
+        "Create case"
+      ]
+    },
+    {
+      "name": "Beacon Detection",
+      "category": "Beacon Detection",
+      "description": "Detects C2 beaconing patterns via network analysis, blocks C2 domains, isolates compromised hosts.",
+      "mitre_mapping": "T1071 - Application Layer Protocol",
+      "severity": "high",
+      "estimated_runtime": "4-6s",
+      "automation_percent": 84,
+      "approval_required": true,
+      "steps": [
+        "Detect beaconing",
+        "Identify C2 server",
+        "Block C2 domains",
+        "Isolate hosts",
+        "Collect network logs",
+        "Create case"
+      ]
+    },
+    {
+      "name": "Crypto Miner",
+      "category": "Crypto Miner",
+      "description": "Detects cryptocurrency mining activity, kills mining processes, blocks mining pools, isolates endpoint.",
+      "mitre_mapping": "T1496 - Resource Hijacking",
+      "severity": "medium",
+      "estimated_runtime": "2-4s",
+      "automation_percent": 91,
+      "approval_required": false,
+      "steps": [
+        "Detect mining activity",
+        "Kill processes",
+        "Block mining pools",
+        "Isolate endpoint",
+        "Notify SOC",
+        "Create case"
+      ]
+    },
+    {
+      "name": "Web Shell",
+      "category": "Web Shell",
+      "description": "Detects web shell deployment on web servers, isolates server, quarantines shell files, patches vulnerabilities.",
+      "mitre_mapping": "T1505.003 - Web Shell",
+      "severity": "critical",
+      "estimated_runtime": "4-7s",
+      "automation_percent": 83,
+      "approval_required": true,
+      "steps": [
+        "Detect web shell",
+        "Isolate server",
+        "Quarantine files",
+        "Analyze access logs",
+        "Patch vulnerability",
+        "Create case"
+      ]
+    },
+    {
+      "name": "DNS Tunneling",
+      "category": "DNS Tunneling",
+      "description": "Detects DNS tunneling for data exfiltration, blocks malicious domains, isolates affected DNS clients.",
+      "mitre_mapping": "T1071.004 - DNS",
+      "severity": "high",
+      "estimated_runtime": "3-5s",
+      "automation_percent": 86,
+      "approval_required": false,
+      "steps": [
+        "Detect DNS tunneling",
+        "Block domains",
+        "Isolate clients",
+        "Collect DNS logs",
+        "Check for malware",
+        "Create case"
+      ]
+    },
+    {
+      "name": "Reverse Shell",
+      "category": "Reverse Shell",
+      "description": "Detects reverse shell connections, kills process, isolates endpoint, blocks C2 IP, collects forensic evidence.",
+      "mitre_mapping": "T1059 - Command and Scripting",
+      "severity": "critical",
+      "estimated_runtime": "3-5s",
+      "automation_percent": 87,
+      "approval_required": true,
+      "steps": [
+        "Detect reverse shell",
+        "Kill process",
+        "Isolate endpoint",
+        "Block C2 IP",
+        "Collect evidence",
+        "Create case"
+      ]
+    },
+    {
+      "name": "Insider Threat",
+      "category": "Insider Threat",
+      "description": "Detects insider threat indicators, monitors user activity, restricts access, notifies HR and security team.",
+      "mitre_mapping": "T1078 - Valid Accounts",
+      "severity": "high",
+      "estimated_runtime": "5-8s",
+      "automation_percent": 70,
+      "approval_required": true,
+      "steps": [
+        "Detect insider indicators",
+        "Monitor activity",
+        "Restrict access",
+        "Collect evidence",
+        "Notify HR & Security",
+        "Create case"
+      ]
+    },
+    {
+      "name": "Unauthorized Admin Login",
+      "category": "Unauthorized Admin Login",
+      "description": "Detects unauthorized admin login attempts, challenges MFA, revokes session, disables account if confirmed.",
+      "mitre_mapping": "T1078 - Valid Accounts",
+      "severity": "critical",
+      "estimated_runtime": "2-3s",
+      "automation_percent": 92,
+      "approval_required": true,
+      "steps": [
+        "Detect admin login",
+        "Challenge MFA",
+        "Verify source",
+        "Revoke session",
+        "Disable account if needed",
+        "Create case"
+      ]
+    }
+  ],
+  "cases": {
+    "open": "bg-blue-500/10 text-blue-400",
+    "investigating": "bg-amber-500/10 text-amber-400",
+    "contained": "bg-orange-500/10 text-orange-400",
+    "resolved": "bg-emerald-500/10 text-emerald-400",
+    "closed": "bg-white/5 text-white/40"
+  },
+  "ai_decision_factors": "[{id:\"malware\",label:\"Known Malware\",points:40,icon:pl,desc:\"Hash matches known malware signature\"},{id:\"country\",label:\"Outside Country\",points:15,icon:qC,desc:\"Source IP from unexpected geography\"},{id:\"travel\",label:\"Impossible Travel\",points:20,icon:LQ,desc:\"Logins from impossible locations\"},{id:\"asset\",label:\"Critical Asset\",points:15,icon:HC,desc:\"Target asset is business-critical\"},{id:\"logins\",label:\"Multiple Failed Login\",points:10,icon:Fg,desc:\"Multiple authentication failures\"},{id:\"intel\",label:\"Threat Intel Match\",points:25,icon:cu,desc:\"IOC matches threat intelligence\"}],jc=[{range:\"0-20\",label:\"Low\",color:\"#22c55e\",action:\"Monitor\",bgClass:\"bg-emerald-500/10 text-emerald-400 border-emerald-500/20\"},{range:\"21-40\",label:\"Medium\",color:\"#eab308\",action:\"Escalate\",bgClass:\"bg-amber-500/10 text-amber-400 border-amber-500/20\"},{range:\"41-60\",label:\"High\",color:\"#f97316\",action:\"Contain\",bgClass:\"bg-orange-500/10 text-orange-400 border-orange-500/20\"},{range:\"61-80\",label:\"Critical\",color:\"#ef4444\",action:\"Block & Isolate\",bgClass:\"bg-red-500/10 text-red-400 border-red-500/20\"},{range:\"81-100\",label:\"Emergency\",color:\"#dc2626\",action:\"Isolate & Disable User\",bgClass:\"bg-red-600/15 text-red-500 border-red-600/30\"}],gDe={Low:[\"Monitor activity\",\"Log for future reference\",\"No immediate action required\"],Medium:[\"Escalate to L2 analyst\",\"Increase monitoring level\",\"Review related logs\"],High:[\"Contain affected endpoint\",\"Block source IP\",\"Collect forensic evidence\",\"Notify SOC team\"],Critical:[\"Block source IP at firewall\",\"Isolate affected endpoint\",\"Disable compromised accounts\",\"Reset passwords\",\"Notify IR team immediately\"],Emergency:[\"Mass isolate affected endpoints\",\"Block all associated IOCs\",\"Disable user accounts\",\"Reset all affected credentials\",\"Activate IR playbook\",\"Notify CISO and management\"]};function yDe(){const[e,t]=_.useState(new Set([\"malware\",\"intel\",\"asset\"])),n=o=>{t(a=>{const s=new Set(a);return s.has(o)?s.delete(o):s.add(o),s})},r=_.useMemo(()=>Math.min(100,bF.filter(o=>e.has(o.id)).reduce((o,a)=>o+a.points,0)),[e]),i=_.useMemo(()=>r<=20?jc[0]:r<=40?jc[1]:r<=60?jc[2]:r<=80?jc[3]:jc[4],[r]);return d.jsxs(\"div\",{className:\"space-y-6\",children:[d.jsxs(\"div\",{children:[d.jsx(\"h1\",{className:\"text-2xl font-bold text-white\",children:\"AI Decision Engine\"}),d.jsx(\"p\",{className:\"text-sm text-white/40 mt-1\",children:\"Risk-based automated decision making with explainable scoring\"})]}),d.jsxs(\"div\",{className:\"grid grid-cols-1 lg:grid-cols-2 gap-4\",children:[d.jsxs(\"div\",{className:\"glass rounded-xl p-5 border border-white/5\",children:[d.jsxs(\"div\",{className:\"flex items-center gap-2 mb-4\",children:[d.jsx(uY,{className:\"w-4 h-4 text-vr-accent\"}),d.jsx(\"h3\",{className:\"text-sm font-semibold text-white\",children:\"Risk Factors\"})]}),d.jsx(\"p\",{className:\"text-xs text-white/30 mb-4\",children:\"Select active risk factors to calculate the AI risk score\"}),d.jsx(\"div\",{className:\"space-y-2\",children:bF.map(o=>{const a=e.has(o.id);return d.jsxs(\"button\",{onClick:()=>n(o.id),className:`w-full flex items-center gap-3 p-3 rounded-lg border transition-all text-left ${a?\"bg-vr-accent/10 border-vr-accent/30\":\"bg-white/[0.02] border-white/5 hover:border-white/10\"}`,children:[d.jsx(\"div\",{className:`w-8 h-8 rounded-lg flex items-center justify-center ${a?\"bg-vr-accent/20\":\"bg-white/5\"}`,children:d.jsx(o.icon,{className:`w-4 h-4 ${a?\"text-vr-accent\":\"text-white/30\"}`})}),d.jsxs(\"div\",{className:\"flex-1 min-w-0\",children:[d.jsx(\"p\",{className:`text-sm font-medium ${a?\"text-white\":\"text-white/60\"}`,children:o.label}),d.jsx(\"p\",{className:\"text-[10px] text-white/30\",children:o.desc})]}),d.jsxs(\"span\",{className:`text-sm font-bold ${a?\"text-vr-accent\":\"text-white/20\"}`,children:[\"+\",o.points]})]},o.id)})})]}),d.jsxs(\"div\",{className:\"glass rounded-xl p-5 border border-white/5 flex flex-col\",children:[d.jsxs(\"div\",{className:\"flex items-center gap-2 mb-4\",children:[d.jsx(yv,{className:\"w-4 h-4 text-vr-accent\"}),d.jsx(\"h3\",{className:\"text-sm font-semibold text-white\",children:\"Risk Assessment\"})]}),d.jsxs(\"div\",{className:\"flex flex-col items-center justify-center py-6\",children:[d.jsxs(\"div\",{className:\"relative w-40 h-40\",children:[d.jsxs(\"svg\",{className:\"w-40 h-40 -rotate-90\",viewBox:\"0 0 160 160\",children:[d.jsx(\"circle\",{cx:\"80\",cy:\"80\",r:\"70\",fill:\"none\",stroke:\"rgba(255,255,255,0.05)\",strokeWidth:\"8\"}),d.jsx(nt.circle,{cx:\"80\",cy:\"80\",r:\"70\",fill:\"none\",stroke:i.color,strokeWidth:\"8\",strokeLinecap:\"round\",strokeDasharray:2*Math.PI*70,animate:{strokeDashoffset:2*Math.PI*70*(1-r/100)},transition:{duration:.6,type:\"spring\"}})]}),d.jsxs(\"div\",{className:\"absolute inset-0 flex flex-col items-center justify-center\",children:[d.jsx(\"span\",{className:\"text-4xl font-bold text-white\",children:r}),d.jsx(\"span\",{className:\"text-[10px] text-white/30 uppercase tracking-wider\",children:\"Risk Score\"})]})]}),d.jsx(\"div\",{className:`mt-4 px-4 py-1.5 rounded-lg border ${i.bgClass} font-semibold text-sm uppercase tracking-wider`,children:i.label}),d.jsxs(\"p\",{className:\"text-xs text-white/40 mt-2\",children:[\"Score range: \",i.range]})]}),d.jsxs(\"div\",{className:\"bg-white/[0.03] rounded-lg p-3 mt-2\",children:[d.jsx(\"p\",{className:\"text-[10px] uppercase tracking-wider text-white/30 mb-1\",children:\"Recommended Action\"}),d.jsx(\"p\",{className:\"text-sm font-semibold\",style:{color:i.color},children:i.action})]})]})]}),d.jsxs(\"div\",{className:\"glass rounded-xl p-5 border border-white/5\",children:[d.jsx(\"h3\",{className:\"text-sm font-semibold text-white mb-4\",children:\"Risk Level Matrix\"}),d.jsx(\"div\",{className:\"grid grid-cols-1 md:grid-cols-5 gap-2\",children:jc.map(o=>{const a=i.label===o.label;return d.jsxs(\"div\",{className:`p-3 rounded-lg border text-center transition-all ${o.bgClass} ${a?\"ring-2 ring-offset-2 ring-offset-vr-bg scale-105\":\"\"}`,children:[d.jsx(\"p\",{className:\"text-[10px] font-mono opacity-60\",children:o.range}),d.jsx(\"p\",{className:\"text-sm font-bold mt-1\",children:o.label}),d.jsx(\"p\",{className:\"text-[10px] mt-1 opacity-70\",children:o.action})]},o.label)})})]}),d.jsxs(nt.div,{initial:{opacity:0},animate:{opacity:1},className:\"glass rounded-xl p-5 border border-white/5\",children:[d.jsxs(\"h3\",{className:\"text-sm font-semibold text-white mb-4\",children:[\"Recommended Response Actions — \",i.label]}),d.jsx(\"div\",{className:\"space-y-2\",children:gDe[i.label].map((o,a)=>d.jsxs(nt.div,{initial:{opacity:0,x:-10},animate:{opacity:1,x:0},transition:{delay:a*.08},className:\"flex items-center gap-3 p-3 rounded-lg bg-white/[0.03]\",children:[d.jsx(\"span\",{className:\"w-6 h-6 rounded flex items-center justify-center flex-shrink-0 text-[10px] font-bold\",style:{background:`${i.color}20`,color:i.color},children:a+1}),d.jsx(\"p\",{className:\"text-sm text-white/70\",children:o})]},a))})]})]})}const wF=[{category:\"Network & Firewall\",actions:[{name:\"Block Firewall IP\",icon:oJ,desc:\"Block source IP at perimeter firewall\"},{name:\"Block Domain\",icon:IT,desc:\"Block malicious domain at DNS/firewall\"},{name:\"Block URL\",icon:fQ,desc:\"Block URL at web proxy\"},{name:\"Block Hash\",icon:Bg,desc:\"Block file hash across endpoints\"}]},{category:\"Identity & Access\",actions:[{name:\"Disable User\",icon:PJ,desc:\"Disable Active Directory user account\"},{name:\"Reset Password\",icon:Fg,desc:\"Force password reset for compromised account\"},{name:\"Terminate Session\",icon:UF,desc:\"Revoke all active user sessions\"}]},{category:\"Endpoint Response\",actions:[{name:\"Kill Process\",icon:RQ,desc:\"Terminate malicious process on endpoint\"},{name:\"Kill Service\",icon:VF,desc:\"Stop suspicious Windows service\"},{name:\"Lock Endpoint\",icon:ll,desc:\"Lock endpoint screen remotely\"},{name:\"Isolate Endpoint\",icon:Fc,desc:\"Network-isolate endpoint from LAN\"},{name:\"Quarantine File\",icon:GY,desc:\"Move malicious file to quarantine\"},{name:\"Disable USB\",icon:IT,desc:\"Disable USB mass storage device access\"}]},{category:\"Evidence Collection\",actions:[{name:\"Collect Logs\",icon:QQ,desc:\"Collect system and application logs\"},{name:\"Collect Memory\",icon:qF,desc:\"Capture volatile memory dump\"},{name:\"Collect Registry\",icon:cu,desc:\"Export Windows registry hives\"},{name:\"Collect Browser History\",icon:Yh,desc:\"Extract browser history and cookies\"},{name:\"Capture Screenshot\",icon:fY,desc:\"Capture endpoint screen\"}]},{category:\"Notification & Tickets\",actions:[{name:\"Create Jira Ticket\",icon:Hj,desc:\"Create Jira issue for tracking\"},{name:\"Create ServiceNow Ticket\",icon:Hj,desc:\"Create ServiceNow incident ticket\"},{name:\"Notify Slack\",icon:zg,desc:\"Send alert to Slack #soc-alerts\"},{name:\"Notify Teams\",icon:zg,desc:\"Send alert to MS Teams channel\"},{name:\"Send Email\",icon:ea,desc:\"Send notification email to SOC team\"},{name:\"Generate PDF Report\",icon:Jn,desc:\"Generate incident PDF report\"},{name:\"Generate Timeline\",icon:Ol,desc:\"Generate incident timeline report\"}]}]",
+  "soar_actions": "[{category:\"Network & Firewall\",actions:[{name:\"Block Firewall IP\",icon:oJ,desc:\"Block source IP at perimeter firewall\"},{name:\"Block Domain\",icon:IT,desc:\"Block malicious domain at DNS/firewall\"},{name:\"Block URL\",icon:fQ,desc:\"Block URL at web proxy\"},{name:\"Block Hash\",icon:Bg,desc:\"Block file hash across endpoints\"}]},{category:\"Identity & Access\",actions:[{name:\"Disable User\",icon:PJ,desc:\"Disable Active Directory user account\"},{name:\"Reset Password\",icon:Fg,desc:\"Force password reset for compromised account\"},{name:\"Terminate Session\",icon:UF,desc:\"Revoke all active user sessions\"}]},{category:\"Endpoint Response\",actions:[{name:\"Kill Process\",icon:RQ,desc:\"Terminate malicious process on endpoint\"},{name:\"Kill Service\",icon:VF,desc:\"Stop suspicious Windows service\"},{name:\"Lock Endpoint\",icon:ll,desc:\"Lock endpoint screen remotely\"},{name:\"Isolate Endpoint\",icon:Fc,desc:\"Network-isolate endpoint from LAN\"},{name:\"Quarantine File\",icon:GY,desc:\"Move malicious file to quarantine\"},{name:\"Disable USB\",icon:IT,desc:\"Disable USB mass storage device access\"}]},{category:\"Evidence Collection\",actions:[{name:\"Collect Logs\",icon:QQ,desc:\"Collect system and application logs\"},{name:\"Collect Memory\",icon:qF,desc:\"Capture volatile memory dump\"},{name:\"Collect Registry\",icon:cu,desc:\"Export Windows registry hives\"},{name:\"Collect Browser History\",icon:Yh,desc:\"Extract browser history and cookies\"},{name:\"Capture Screenshot\",icon:fY,desc:\"Capture endpoint screen\"}]},{category:\"Notification & Tickets\",actions:[{name:\"Create Jira Ticket\",icon:Hj,desc:\"Create Jira issue for tracking\"},{name:\"Create ServiceNow Ticket\",icon:Hj,desc:\"Create ServiceNow incident ticket\"},{name:\"Notify Slack\",icon:zg,desc:\"Send alert to Slack #soc-alerts\"},{name:\"Notify Teams\",icon:zg,desc:\"Send alert to MS Teams channel\"},{name:\"Send Email\",icon:ea,desc:\"Send notification email to SOC team\"},{name:\"Generate PDF Report\",icon:Jn,desc:\"Generate incident PDF report\"},{name:\"Generate Timeline\",icon:Ol,desc:\"Generate incident timeline report\"}]}]",
+  "approvals": [
+    {
+      "id": 1,
+      "incident_title": "Brute Force on DC-01",
+      "playbook_name": "Brute Force Response",
+      "action": "Block Firewall IP + Disable User",
+      "status": "pending",
+      "requester": "AI Engine",
+      "approver": "",
+      "comment": "",
+      "risk_score": 92
+    },
+    {
+      "id": 2,
+      "incident_title": "PowerShell Encoded Payload",
+      "playbook_name": "PowerShell Attack",
+      "action": "Isolate Endpoint + Kill Process",
+      "status": "pending",
+      "requester": "AI Engine",
+      "approver": "",
+      "comment": "",
+      "risk_score": 88
+    },
+    {
+      "id": 3,
+      "incident_title": "DNS Tunneling — SRV-08",
+      "playbook_name": "DNS Tunneling",
+      "action": "Block Domain + Collect Memory",
+      "status": "pending",
+      "requester": "AI Engine",
+      "approver": "",
+      "comment": "",
+      "risk_score": 82
+    },
+    {
+      "id": 4,
+      "incident_title": "Malware on WS-045",
+      "playbook_name": "Malware Containment",
+      "action": "Isolate Endpoint + Quarantine File",
+      "status": "approved",
+      "requester": "AI Engine",
+      "approver": "admin@vrsoc.com",
+      "comment": "Approved — proceed with isolation",
+      "risk_score": 95
+    },
+    {
+      "id": 5,
+      "incident_title": "Reverse Shell Detected",
+      "playbook_name": "Reverse Shell",
+      "action": "Kill Process + Isolate + Block C2",
+      "status": "rejected",
+      "requester": "AI Engine",
+      "approver": "admin@vrsoc.com",
+      "comment": "False positive — verified activity was authorized pentest",
+      "risk_score": 90
+    },
+    {
+      "id": 6,
+      "incident_title": "Privilege Escalation WS-023",
+      "playbook_name": "Privilege Escalation",
+      "action": "Disable User + Reset Password",
+      "status": "approved",
+      "requester": "AI Engine",
+      "approver": "admin@vrsoc.com",
+      "comment": "Approved — disable account immediately",
+      "risk_score": 85
+    }
+  ],
+  "automation_history": [
+    {
+      "id": 1,
+      "time": "Jul 16, 10:32 AM",
+      "incident": "INC-2026-0342",
+      "playbook": "Brute Force Response",
+      "duration": "2.3s",
+      "result": "Success — IP blocked, accounts disabled",
+      "status": "success",
+      "analyst": "AI Engine",
+      "risk_score": 92
+    },
+    {
+      "id": 2,
+      "time": "Jul 16, 10:28 AM",
+      "incident": "INC-2026-0341",
+      "playbook": "PowerShell Attack",
+      "duration": "—",
+      "result": "Running — executing playbook steps",
+      "status": "running",
+      "analyst": "AI Engine",
+      "risk_score": 88
+    },
+    {
+      "id": 3,
+      "time": "Jul 16, 10:20 AM",
+      "incident": "INC-2026-0340",
+      "playbook": "DNS Tunneling",
+      "duration": "4.1s",
+      "result": "Success — domains blocked, client isolated",
+      "status": "success",
+      "analyst": "AI Engine",
+      "risk_score": 82
+    },
+    {
+      "id": 4,
+      "time": "Jul 16, 10:05 AM",
+      "incident": "INC-2026-0339",
+      "playbook": "USB Malware",
+      "duration": "2.0s",
+      "result": "Success — USB blocked, files scanned",
+      "status": "success",
+      "analyst": "M. Johnson",
+      "risk_score": 35
+    },
+    {
+      "id": 5,
+      "time": "Jul 16, 09:55 AM",
+      "incident": "INC-2026-0338",
+      "playbook": "Privilege Escalation",
+      "duration": "3.7s",
+      "result": "Success — endpoint isolated, processes killed",
+      "status": "success",
+      "analyst": "AI Engine",
+      "risk_score": 80
+    },
+    {
+      "id": 6,
+      "time": "Jul 16, 09:32 AM",
+      "incident": "INC-2026-0337",
+      "playbook": "Suspicious Login",
+      "duration": "1.2s",
+      "result": "Failed — timeout connecting to AD",
+      "status": "failed",
+      "analyst": "AI Engine",
+      "risk_score": 55
+    },
+    {
+      "id": 7,
+      "time": "Jul 16, 09:15 AM",
+      "incident": "INC-2026-0336",
+      "playbook": "Malware Containment",
+      "duration": "5.8s",
+      "result": "Success — endpoint isolated, files quarantined",
+      "status": "success",
+      "analyst": "AI Engine",
+      "risk_score": 95
+    },
+    {
+      "id": 8,
+      "time": "Jul 16, 08:47 AM",
+      "incident": "INC-2026-0335",
+      "playbook": "Phishing Response",
+      "duration": "4.5s",
+      "result": "Success — emails deleted, domains blocked",
+      "status": "success",
+      "analyst": "J. Smith",
+      "risk_score": 72
+    },
+    {
+      "id": 9,
+      "time": "Jul 16, 08:20 AM",
+      "incident": "INC-2026-0334",
+      "playbook": "Beacon Detection",
+      "duration": "3.2s",
+      "result": "Success — C2 blocked, host isolated",
+      "status": "success",
+      "analyst": "AI Engine",
+      "risk_score": 78
+    },
+    {
+      "id": 10,
+      "time": "Jul 15, 11:45 PM",
+      "incident": "INC-2026-0333",
+      "playbook": "Reverse Shell",
+      "duration": "—",
+      "result": "Pending — awaiting approval",
+      "status": "pending",
+      "analyst": "AI Engine",
+      "risk_score": 90
+    }
+  ],
+  "report_types": "[{id:\"incident\",name:\"Incident Report\",desc:\"Detailed incident analysis with timeline and IOCs\",icon:Jn},{id:\"executive\",name:\"Executive Report\",desc:\"High-level summary for management and stakeholders\",icon:UY},{id:\"technical\",name:\"Technical Report\",desc:\"In-depth technical analysis with forensic details\",icon:Jn},{id:\"containment\",name:\"Containment Report\",desc:\"Actions taken to contain and isolate the threat\",icon:Jn},{id:\"recovery\",name:\"Recovery Report\",desc:\"Recovery and restoration actions documentation\",icon:Jn},{id:\"rootcause\",name:\"Root Cause Report\",desc:\"Analysis of underlying causes and contributing factors\",icon:Jn},{id:\"compliance\",name:\"Compliance Report\",desc:\"Regulatory and compliance impact assessment\",icon:Jn},{id:\"timeline\",name:\"Timeline Report\",desc:\"Chronological incident timeline with all events\",icon:Jn},{id:\"ioc\",name:\"IOC Report\",desc:\"Complete list of indicators of compromise\",icon:Jn}],_F=[{id:\"INC-2026-0342\",title:\"Brute Force on DC-01\",risk:92},{id:\"INC-2026-0341\",title:\"PowerShell Encoded Payload\",risk:88},{id:\"INC-2026-0340\",title:\"DNS Tunneling — SRV-08\",risk:82},{id:\"INC-2026-0338\",title:\"Privilege Escalation — WS-023\",risk:80}]",
+  "threat_intel": "[{name:\"VirusTotal\",icon:Kr,status:\"completed\",result:\"Malicious — 42/88 detections\",color:\"#ef4444\"},{name:\"AbuseIPDB\",icon:Tl,status:\"completed\",result:\"Abuse confidence: 94%\",color:\"#f97316\"},{name:\"AlienVault OTX\",icon:pl,status:\"completed\",result:\"3 pulses, 12 IOCs linked\",color:\"#a855f7\"},{name:\"GreyNoise\",icon:Vu,status:\"completed\",result:\"Malicious scanner — noise: false\",color:\"#3b82f6\"},{name:\"GeoIP\",icon:qC,status:\"completed\",result:\"Bucharest, Romania (EU)\",color:\"#22c55e\"},{name:\"MISP\",icon:cu,status:\"completed\",result:\"Matched event #4821 — C2 infrastructure\",color:\"#eab308\"},{name:\"OpenCTI\",icon:BC,status:\"completed\",result:\"Threat actor: APT28 (Fancy Bear)\",color:\"#ef4444\"},{name:\"Shodan\",icon:uu,status:\"completed\",result:\"Open ports: 22, 80, 4443, 3389\",color:\"#06b6d4\"}],Ei={ipReputation:{score:94,label:\"Malicious\",color:\"#ef4444\"},hashReputation:{score:87,label:\"Malicious\",color:\"#ef4444\"},country:\"Romania\",asn:\"AS9009 (M247 Europe SRL)\",maliciousScore:92,knownMalware:[\"Emotet\",\"TrickBot\",\"Cobalt Strike\"],threatActor:\"APT28 (Fancy Bear)\",relatedCVEs:[\"CVE-2024-12345\",\"CVE-2023-98765\"],mitreMapping:\"T1110 - Brute Force, T1059 - Execution\",historicalActivity:\"47 incidents in last 90 days\",iocReputation:{score:89,label:\"High Risk\",color:\"#f97316\"}};function mDe(){const[e,t]=_.useState(\"185.220.101.42\"),[n,r]=_.useState(!0),[i,o]=_.useState(!1),a=()=>{o(!0),r(!1),setTimeout(()=>{o(!1),r(!0)},1500)};return d.jsxs(\"div\",{className:\"space-y-6\",children:[d.jsxs(\"div\",{children:[d.jsx(\"h1\",{className:\"text-2xl font-bold text-white\",children:\"Threat Enrichment\"}),d.jsx(\"p\",{className:\"text-sm text-white/40 mt-1\",children:\"Automatically enrich every incident with multi-source threat intelligence\"})]}),d.jsxs(\"div\",{className:\"glass rounded-xl p-5 border border-white/5\",children:[d.jsxs(\"div\",{className:\"flex gap-3\",children:[d.jsxs(\"div\",{className:\"relative flex-1\",children:[d.jsx(Xr,{className:\"absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30\"}),d.jsx(pt,{placeholder:\"Enter IP, hash, domain, or URL...\",value:e,onChange:s=>t(s.target.value),className:\"pl-9 bg-white/5 border-white/10 text-white font-mono text-sm h-10\"})]}),d.jsxs(Me,{onClick:a,disabled:i,className:\"bg-vr-accent hover:bg-vr-accent/80 text-white h-10\",children:[i?d.jsx(\"div\",{className:\"w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin\"}):d.jsx(Ko,{className:\"w-4 h-4 mr-1.5\"}),i?\"Enriching...\":\"Enrich\"]})]}),d.jsx(\"div\",{className:\"flex flex-wrap gap-2 mt-3\",children:[\"185.220.101.42\",\"7f2c9e8a3b4d\",\"suspicious-domain.com\",\"http://malware-c2.tk/payload\"].map(s=>d.jsx(\"button\",{onClick:()=>t(s),className:\"text-[10px] font-mono text-white/30 hover:text-white/60 px-2 py-1 rounded bg-white/5 hover:bg-white/10 transition-colors\",children:s},s))})]}),n&&!i&&d.jsxs(nt.div,{initial:{opacity:0},animate:{opacity:1},className:\"space-y-4\",children:[d.jsx(\"div\",{className:\"grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3\",children:pDe.map((s,l)=>d.jsxs(nt.div,{initial:{opacity:0,y:10},animate:{opacity:1,y:0},transition:{delay:l*.05},className:\"glass rounded-xl p-4 border border-white/5\",children:[d.jsxs(\"div\",{className:\"flex items-center gap-2 mb-2\",children:[d.jsx(\"div\",{className:\"w-8 h-8 rounded-lg flex items-center justify-center\",style:{background:`${s.color}15`},children:d.jsx(s.icon,{className:\"w-4 h-4\",style:{color:s.color}})}),d.jsx(\"span\",{className:\"text-xs font-semibold text-white\",children:s.name})]}),d.jsx(\"p\",{className:\"text-xs text-white/50\",children:s.result}),d.jsxs(\"div\",{className:\"flex items-center gap-1 mt-2\",children:[d.jsx(\"div\",{className:\"w-1.5 h-1.5 rounded-full bg-emerald-400\"}),d.jsx(\"span\",{className:\"text-[9px] text-emerald-400 uppercase tracking-wider\",children:s.status})]})]},s.name))}),d.jsxs(\"div\",{className:\"grid grid-cols-1 lg:grid-cols-3 gap-4\",children:[d.jsxs(\"div\",{className:\"glass rounded-xl p-5 border border-white/5\",children:[d.jsx(\"h3\",{className:\"text-sm font-semibold text-white mb-4\",children:\"Reputation Scores\"}),d.jsx(\"div\",{className:\"space-y-4\",children:[{label:\"IP Reputation\",data:Ei.ipReputation,icon:Ko},{label:\"Hash Reputation\",data:Ei.hashReputation,icon:Bg},{label:\"IOC Reputation\",data:Ei.iocReputation,icon:DY}].map(({label:s,data:l,icon:u})=>d.jsxs(\"div\",{className:\"flex items-center gap-3\",children:[d.jsx(u,{className:\"w-4 h-4 text-white/30\"}),d.jsxs(\"div\",{className:\"flex-1\",children:[d.jsxs(\"div\",{className:\"flex items-center justify-between mb-1\",children:[d.jsx(\"span\",{className:\"text-xs text-white/50\",children:s}),d.jsx(\"span\",{className:\"text-xs font-semibold\",style:{color:l.color},children:l.label})]}),d.jsx(\"div\",{className:\"h-2 bg-white/5 rounded-full overflow-hidden\",children:d.jsx(nt.div,{initial:{width:0},animate:{width:`${l.score}%`},transition:{duration:.8},className:\"h-full rounded-full\",style:{background:l.color}})}),d.jsxs(\"span\",{className:\"text-[10px] text-white/30 mt-0.5 block\",children:[l.score,\"/100\"]})]})]},s))})]}),d.jsxs(\"div\",{className:\"glass rounded-xl p-5 border border-white/5\",children:[d.jsx(\"h3\",{className:\"text-sm font-semibold text-white mb-4\",children:\"Geo & Network\"}),d.jsx(\"div\",{className:\"space-y-3 text-sm\",children:[{label:\"Country\",value:Ei.country,icon:qC},{label:\"ASN\",value:Ei.asn,icon:uu},{label:\"Malicious Score\",value:`${Ei.maliciousScore}/100`,icon:Tl},{label:\"Historical Activity\",value:Ei.historicalActivity,icon:Vu}].map(({label:s,value:l,icon:u})=>d.jsxs(\"div\",{className:\"flex items-center gap-2 p-2 rounded-lg bg-white/[0.03]\",children:[d.jsx(u,{className:\"w-3.5 h-3.5 text-white/30 flex-shrink-0\"}),d.jsx(\"span\",{className:\"text-xs text-white/40\",children:s}),d.jsx(\"span\",{className:\"text-xs text-white/80 ml-auto text-right\",children:l})]},s))})]}),d.jsxs(\"div\",{className:\"glass rounded-xl p-5 border border-white/5\",children:[d.jsx(\"h3\",{className:\"text-sm font-semibold text-white mb-4\",children:\"Threat Intelligence\"}),d.jsxs(\"div\",{className:\"space-y-3 text-sm\",children:[d.jsxs(\"div\",{className:\"p-2 rounded-lg bg-white/[0.03]\",children:[d.jsx(\"span\",{className:\"text-[10px] text-white/30 uppercase\",children:\"Threat Actor\"}),d.jsxs(\"p\",{className:\"text-xs text-red-400 flex items-center gap-1.5\",children:[d.jsx(pl,{className:\"w-3 h-3\"}),\" \",Ei.threatActor]})]}),d.jsxs(\"div\",{className:\"p-2 rounded-lg bg-white/[0.03]\",children:[d.jsx(\"span\",{className:\"text-[10px] text-white/30 uppercase\",children:\"Known Malware\"}),d.jsx(\"div\",{className:\"flex flex-wrap gap-1 mt-1\",children:Ei.knownMalware.map(s=>d.jsx(\"span\",{className:\"text-[10px] bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded\",children:s},s))})]}),d.jsxs(\"div\",{className:\"p-2 rounded-lg bg-white/[0.03]\",children:[d.jsx(\"span\",{className:\"text-[10px] text-white/30 uppercase\",children:\"Related CVEs\"}),d.jsx(\"div\",{className:\"flex flex-wrap gap-1 mt-1\",children:Ei.relatedCVEs.map(s=>d.jsx(\"span\",{className:\"text-[10px] bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded font-mono\",children:s},s))})]}),d.jsxs(\"div\",{className:\"p-2 rounded-lg bg-white/[0.03]\",children:[d.jsx(\"span\",{className:\"text-[10px] text-white/30 uppercase\",children:\"MITRE Mapping\"}),d.jsx(\"p\",{className:\"text-[10px] text-vr-accent font-mono mt-0.5\",children:Ei.mitreMapping})]})]})]})]})]}),i&&d.jsxs(\"div\",{className:\"flex flex-col items-center justify-center py-20\",children:[d.jsx(\"div\",{className:\"w-10 h-10 border-4 border-white/10 border-t-vr-accent rounded-full animate-spin mb-4\"}),d.jsx(\"p\",{className:\"text-sm text-white/40\",children:\"Querying 8 threat intelligence sources...\"})]})]})}const bF=[{id:\"malware\",label:\"Known Malware\",points:40,icon:pl,desc:\"Hash matches known malware signature\"},{id:\"country\",label:\"Outside Country\",points:15,icon:qC,desc:\"Source IP from unexpected geography\"},{id:\"travel\",label:\"Impossible Travel\",points:20,icon:LQ,desc:\"Logins from impossible locations\"},{id:\"asset\",label:\"Critical Asset\",points:15,icon:HC,desc:\"Target asset is business-critical\"},{id:\"logins\",label:\"Multiple Failed Login\",points:10,icon:Fg,desc:\"Multiple authentication failures\"},{id:\"intel\",label:\"Threat Intel Match\",points:25,icon:cu,desc:\"IOC matches threat intelligence\"}],jc=[{range:\"0-20\",label:\"Low\",color:\"#22c55e\",action:\"Monitor\",bgClass:\"bg-emerald-500/10 text-emerald-400 border-emerald-500/20\"},{range:\"21-40\",label:\"Medium\",color:\"#eab308\",action:\"Escalate\",bgClass:\"bg-amber-500/10 text-amber-400 border-amber-500/20\"},{range:\"41-60\",label:\"High\",color:\"#f97316\",action:\"Contain\",bgClass:\"bg-orange-500/10 text-orange-400 border-orange-500/20\"},{range:\"61-80\",label:\"Critical\",color:\"#ef4444\",action:\"Block & Isolate\",bgClass:\"bg-red-500/10 text-red-400 border-red-500/20\"},{range:\"81-100\",label:\"Emergency\",color:\"#dc2626\",action:\"Isolate & Disable User\",bgClass:\"bg-red-600/15 text-red-500 border-red-600/30\"}],gDe={Low:[\"Monitor activity\",\"Log for future reference\",\"No immediate action required\"],Medium:[\"Escalate to L2 analyst\",\"Increase monitoring level\",\"Review related logs\"],High:[\"Contain affected endpoint\",\"Block source IP\",\"Collect forensic evidence\",\"Notify SOC team\"],Critical:[\"Block source IP at firewall\",\"Isolate affected endpoint\",\"Disable compromised accounts\",\"Reset passwords\",\"Notify IR team immediately\"],Emergency:[\"Mass isolate affected endpoints\",\"Block all associated IOCs\",\"Disable user accounts\",\"Reset all affected credentials\",\"Activate IR playbook\",\"Notify CISO and management\"]};function yDe(){const[e,t]=_.useState(new Set([\"malware\",\"intel\",\"asset\"])),n=o=>{t(a=>{const s=new Set(a);return s.has(o)?s.delete(o):s.add(o),s})},r=_.useMemo(()=>Math.min(100,bF.filter(o=>e.has(o.id)).reduce((o,a)=>o+a.points,0)),[e]),i=_.useMemo(()=>r<=20?jc[0]:r<=40?jc[1]:r<=60?jc[2]:r<=80?jc[3]:jc[4],[r]);return d.jsxs(\"div\",{className:\"space-y-6\",children:[d.jsxs(\"div\",{children:[d.jsx(\"h1\",{className:\"text-2xl font-bold text-white\",children:\"AI Decision Engine\"}),d.jsx(\"p\",{className:\"text-sm text-white/40 mt-1\",children:\"Risk-based automated decision making with explainable scoring\"})]}),d.jsxs(\"div\",{className:\"grid grid-cols-1 lg:grid-cols-2 gap-4\",children:[d.jsxs(\"div\",{className:\"glass rounded-xl p-5 border border-white/5\",children:[d.jsxs(\"div\",{className:\"flex items-center gap-2 mb-4\",children:[d.jsx(uY,{className:\"w-4 h-4 text-vr-accent\"}),d.jsx(\"h3\",{className:\"text-sm font-semibold text-white\",children:\"Risk Factors\"})]}),d.jsx(\"p\",{className:\"text-xs text-white/30 mb-4\",children:\"Select active risk factors to calculate the AI risk score\"}),d.jsx(\"div\",{className:\"space-y-2\",children:bF.map(o=>{const a=e.has(o.id);return d.jsxs(\"button\",{onClick:()=>n(o.id),className:`w-full flex items-center gap-3 p-3 rounded-lg border transition-all text-left ${a?\"bg-vr-accent/10 border-vr-accent/30\":\"bg-white/[0.02] border-white/5 hover:border-white/10\"}`,children:[d.jsx(\"div\",{className:`w-8 h-8 rounded-lg flex items-center justify-center ${a?\"bg-vr-accent/20\":\"bg-white/5\"}`,children:d.jsx(o.icon,{className:`w-4 h-4 ${a?\"text-vr-accent\":\"text-white/30\"}`})}),d.jsxs(\"div\",{className:\"flex-1 min-w-0\",children:[d.jsx(\"p\",{className:`text-sm font-medium ${a?\"text-white\":\"text-white/60\"}`,children:o.label}),d.jsx(\"p\",{className:\"text-[10px] text-white/30\",children:o.desc})]}),d.jsxs(\"span\",{className:`text-sm font-bold ${a?\"text-vr-accent\":\"text-white/20\"}`,children:[\"+\",o.points]})]},o.id)})})]}),d.jsxs(\"div\",{className:\"glass rounded-xl p-5 border border-white/5 flex flex-col\",children:[d.jsxs(\"div\",{className:\"flex items-center gap-2 mb-4\",children:[d.jsx(yv,{className:\"w-4 h-4 text-vr-accent\"}),d.jsx(\"h3\",{className:\"text-sm font-semibold text-white\",children:\"Risk Assessment\"})]}),d.jsxs(\"div\",{className:\"flex flex-col items-center justify-center py-6\",children:[d.jsxs(\"div\",{className:\"relative w-40 h-40\",children:[d.jsxs(\"svg\",{className:\"w-40 h-40 -rotate-90\",viewBox:\"0 0 160 160\",children:[d.jsx(\"circle\",{cx:\"80\",cy:\"80\",r:\"70\",fill:\"none\",stroke:\"rgba(255,255,255,0.05)\",strokeWidth:\"8\"}),d.jsx(nt.circle,{cx:\"80\",cy:\"80\",r:\"70\",fill:\"none\",stroke:i.color,strokeWidth:\"8\",strokeLinecap:\"round\",strokeDasharray:2*Math.PI*70,animate:{strokeDashoffset:2*Math.PI*70*(1-r/100)},transition:{duration:.6,type:\"spring\"}})]}),d.jsxs(\"div\",{className:\"absolute inset-0 flex flex-col items-center justify-center\",children:[d.jsx(\"span\",{className:\"text-4xl font-bold text-white\",children:r}),d.jsx(\"span\",{className:\"text-[10px] text-white/30 uppercase tracking-wider\",children:\"Risk Score\"})]})]}),d.jsx(\"div\",{className:`mt-4 px-4 py-1.5 rounded-lg border ${i.bgClass} font-semibold text-sm uppercase tracking-wider`,children:i.label}),d.jsxs(\"p\",{className:\"text-xs text-white/40 mt-2\",children:[\"Score range: \",i.range]})]}),d.jsxs(\"div\",{className:\"bg-white/[0.03] rounded-lg p-3 mt-2\",children:[d.jsx(\"p\",{className:\"text-[10px] uppercase tracking-wider text-white/30 mb-1\",children:\"Recommended Action\"}),d.jsx(\"p\",{className:\"text-sm font-semibold\",style:{color:i.color},children:i.action})]})]})]}),d.jsxs(\"div\",{className:\"glass rounded-xl p-5 border border-white/5\",children:[d.jsx(\"h3\",{className:\"text-sm font-semibold text-white mb-4\",children:\"Risk Level Matrix\"}),d.jsx(\"div\",{className:\"grid grid-cols-1 md:grid-cols-5 gap-2\",children:jc.map(o=>{const a=i.label===o.label;return d.jsxs(\"div\",{className:`p-3 rounded-lg border text-center transition-all ${o.bgClass} ${a?\"ring-2 ring-offset-2 ring-offset-vr-bg scale-105\":\"\"}`,children:[d.jsx(\"p\",{className:\"text-[10px] font-mono opacity-60\",children:o.range}),d.jsx(\"p\",{className:\"text-sm font-bold mt-1\",children:o.label}),d.jsx(\"p\",{className:\"text-[10px] mt-1 opacity-70\",children:o.action})]},o.label)})})]}),d.jsxs(nt.div,{initial:{opacity:0},animate:{opacity:1},className:\"glass rounded-xl p-5 border border-white/5\",children:[d.jsxs(\"h3\",{className:\"text-sm font-semibold text-white mb-4\",children:[\"Recommended Response Actions — \",i.label]}),d.jsx(\"div\",{className:\"space-y-2\",children:gDe[i.label].map((o,a)=>d.jsxs(nt.div,{initial:{opacity:0,x:-10},animate:{opacity:1,x:0},transition:{delay:a*.08},className:\"flex items-center gap-3 p-3 rounded-lg bg-white/[0.03]\",children:[d.jsx(\"span\",{className:\"w-6 h-6 rounded flex items-center justify-center flex-shrink-0 text-[10px] font-bold\",style:{background:`${i.color}20`,color:i.color},children:a+1}),d.jsx(\"p\",{className:\"text-sm text-white/70\",children:o})]},a))})]})]})}const wF=[{category:\"Network & Firewall\",actions:[{name:\"Block Firewall IP\",icon:oJ,desc:\"Block source IP at perimeter firewall\"},{name:\"Block Domain\",icon:IT,desc:\"Block malicious domain at DNS/firewall\"},{name:\"Block URL\",icon:fQ,desc:\"Block URL at web proxy\"},{name:\"Block Hash\",icon:Bg,desc:\"Block file hash across endpoints\"}]},{category:\"Identity & Access\",actions:[{name:\"Disable User\",icon:PJ,desc:\"Disable Active Directory user account\"},{name:\"Reset Password\",icon:Fg,desc:\"Force password reset for compromised account\"},{name:\"Terminate Session\",icon:UF,desc:\"Revoke all active user sessions\"}]},{category:\"Endpoint Response\",actions:[{name:\"Kill Process\",icon:RQ,desc:\"Terminate malicious process on endpoint\"},{name:\"Kill Service\",icon:VF,desc:\"Stop suspicious Windows service\"},{name:\"Lock Endpoint\",icon:ll,desc:\"Lock endpoint screen remotely\"},{name:\"Isolate Endpoint\",icon:Fc,desc:\"Network-isolate endpoint from LAN\"},{name:\"Quarantine File\",icon:GY,desc:\"Move malicious file to quarantine\"},{name:\"Disable USB\",icon:IT,desc:\"Disable USB mass storage device access\"}]},{category:\"Evidence Collection\",actions:[{name:\"Collect Logs\",icon:QQ,desc:\"Collect system and application logs\"},{name:\"Collect Memory\",icon:qF,desc:\"Capture volatile memory dump\"},{name:\"Collect Registry\",icon:cu,desc:\"Export Windows registry hives\"},{name:\"Collect Browser History\",icon:Yh,desc:\"Extract browser history and cookies\"},{name:\"Capture Screenshot\",icon:fY,desc:\"Capture endpoint screen\"}]},{category:\"Notification & Tickets\",actions:[{name:\"Create Jira Ticket\",icon:Hj,desc:\"Create Jira issue for tracking\"},{name:\"Create ServiceNow Ticket\",icon:Hj,desc:\"Create ServiceNow incident ticket\"},{name:\"Notify Slack\",icon:zg,desc:\"Send alert to Slack #soc-alerts\"},{name:\"Notify Teams\",icon:zg,desc:\"Send alert to MS Teams channel\"},{name:\"Send Email\",icon:ea,desc:\"Send notification email to SOC team\"},{name:\"Generate PDF Report\",icon:Jn,desc:\"Generate incident PDF report\"},{name:\"Generate Timeline\",icon:Ol,desc:\"Generate incident timeline report\"}]}]",
+  "realtime_trend": [
+    {
+      "tactic": "Initial Access",
+      "coverage": 78
+    },
+    {
+      "tactic": "Execution",
+      "coverage": 85
+    },
+    {
+      "tactic": "Persistence",
+      "coverage": 62
+    },
+    {
+      "tactic": "Priv Escalation",
+      "coverage": 71
+    },
+    {
+      "tactic": "Defense Evasion",
+      "coverage": 54
+    },
+    {
+      "tactic": "Credential Access",
+      "coverage": 68
+    },
+    {
+      "tactic": "Discovery",
+      "coverage": 82
+    },
+    {
+      "tactic": "Lateral Movement",
+      "coverage": 59
+    },
+    {
+      "tactic": "Collection",
+      "coverage": 45
+    },
+    {
+      "tactic": "Exfiltration",
+      "coverage": 73
+    }
+  ]
+}

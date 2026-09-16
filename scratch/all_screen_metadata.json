@@ -1,0 +1,258 @@
+[
+  {
+    "id": "dashboard",
+    "route": "/",
+    "comp": "dNe",
+    "title": "SOC Dashboard",
+    "codeLength": 6000,
+    "codeSample": "function dNe(){const[e,t]=_.useState([]),[n,r]=_.useState([]),[i,o]=_.useState([]);_.useEffect(()=>{Je.entities.Agent.list(\"-created_date\",50).then(t).catch(()=>{}),Je.entities.Alert.list(\"-created_date\",10).then(r).catch(()=>{}),Je.entities.Incident.list(\"-created_date\",5).then(o).catch(()=>{})},[]),e.filter(s=>s.status===\"online\").length;const a=n.filter(s=>s.status===\"open\").length;return n.filter(s=>s.severity===\"critical\").length,d.jsxs(\"div\",{className:\"space-y-6\",children:[d.jsxs(\"div\",{c"
+  },
+  {
+    "id": "agents",
+    "route": "/agents",
+    "comp": "YNe",
+    "title": "Agent Management",
+    "codeLength": 6000,
+    "codeSample": "function YNe(){const[e,t]=_.useState([]),[n,r]=_.useState(!0),[i,o]=_.useState(\"\"),[a,s]=_.useState(\"all\"),[l,u]=_.useState(!1),[h,p]=_.useState({agent_name:\"\",hostname:\"\",os:\"Windows 11\",group:\"Default\",ip_address:\"\",version:\"4.8.0\"}),{toast:m}=fr(),y=()=>{r(!0),Je.entities.Agent.list(\"-created_date\",50).then(t).catch(()=>{}).finally(()=>r(!1))};_.useEffect(()=>{y()},[]);const w=async()=>{const b=Math.floor(Math.random()*80)+5,j=Math.floor(Math.random()*70)+15,k=Math.floor(Math.random()*60)+20;"
+  },
+  {
+    "id": "alerts",
+    "route": "/alerts",
+    "comp": "QNe",
+    "title": "Alert Management",
+    "codeLength": 6000,
+    "codeSample": "function QNe(){const[e,t]=_.useState([]),[n,r]=_.useState(!0),[i,o]=_.useState(\"\"),[a,s]=_.useState(\"all\"),[l,u]=_.useState(\"all\"),[h,p]=_.useState(null),{toast:m}=fr(),y=()=>{r(!0),Je.entities.Alert.list(\"-created_date\",50).then(t).catch(()=>{}).finally(()=>r(!1))};_.useEffect(()=>{y()},[]);const w=async(b,j)=>{await Je.entities.Alert.update(b,{status:j}),m({title:\"Alert updated\",description:`Status changed to ${j}`}),y(),(h==null?void 0:h.id)===b&&p({...h,status:j})},v=e.filter(b=>{var P;const"
+  },
+  {
+    "id": "incidents",
+    "route": "/incidents",
+    "comp": "JNe",
+    "title": "Incident Response",
+    "codeLength": 6000,
+    "codeSample": "function JNe(){const[e,t]=_.useState([]),[n,r]=_.useState(!0),[i,o]=_.useState(!1),[a,s]=_.useState(null),[l,u]=_.useState({title:\"\",description:\"\",severity:\"medium\",priority:\"P3\",category:\"\"}),{toast:h}=fr(),p=()=>{r(!0),Je.entities.Incident.list(\"-created_date\",50).then(t).catch(()=>{}).finally(()=>r(!1))};_.useEffect(()=>{p()},[]);const m=async()=>{await Je.entities.Incident.create({...l,status:\"detection\"}),h({title:\"Incident created\"}),o(!1),u({title:\"\",description:\"\",severity:\"medium\",prio"
+  },
+  {
+    "id": "detections",
+    "route": "/detections",
+    "comp": "eOe",
+    "title": "Threat Detection",
+    "codeLength": 6000,
+    "codeSample": "function eOe(){const[e,t]=_.useState(\"\"),[n,r]=_.useState(null),i=ZNe.filter(o=>!e||o.title.toLowerCase().includes(e.toLowerCase())||o.category.toLowerCase().includes(e.toLowerCase()));return d.jsxs(\"div\",{className:\"space-y-6\",children:[d.jsxs(\"div\",{children:[d.jsx(\"h1\",{className:\"text-2xl font-bold text-white\",children:\"Threat Detection Engine\"}),d.jsx(\"p\",{className:\"text-sm text-white/40 mt-1\",children:\"Educational security detections with MITRE ATT&CK mapping\"})]}),d.jsxs(\"div\",{className"
+  },
+  {
+    "id": "mitre",
+    "route": "/mitre",
+    "comp": "dOe",
+    "title": "MITRE ATT&CK Matrix",
+    "codeLength": 6000,
+    "codeSample": "function dOe(){const[e,t]=_.useState(\"\"),[n,r]=_.useState(null),i=hg.reduce((l,u)=>l+u.techniques.length,0),o=hg.reduce((l,u)=>l+u.techniques.filter(h=>h.covered).length,0),a=Math.round(o/i*100),s=hg.filter(l=>!e||l.name.toLowerCase().includes(e.toLowerCase())||l.techniques.some(u=>u.name.toLowerCase().includes(e.toLowerCase())));return d.jsxs(\"div\",{className:\"space-y-6\",children:[d.jsxs(\"div\",{children:[d.jsx(\"h1\",{className:\"text-2xl font-bold text-white\",children:\"MITRE ATT&CK Center\"}),d.js"
+  },
+  {
+    "id": "logs",
+    "route": "/logs",
+    "comp": "hOe",
+    "title": "Log Explorer",
+    "codeLength": 6000,
+    "codeSample": "function hOe(){const[e,t]=_.useState([]),[n,r]=_.useState(!0),[i,o]=_.useState(\"\"),[a,s]=_.useState(\"all\"),[l,u]=_.useState(\"all\"),[h,p]=_.useState(!1),[m,y]=_.useState({source:\"Windows\",level:\"info\",message:\"\",hostname:\"\",user:\"\",event_id:\"\"}),{toast:w}=fr(),v=()=>{r(!0),Je.entities.LogEntry.list(\"-created_date\",100).then(t).catch(()=>{}).finally(()=>r(!1))};_.useEffect(()=>{v()},[]);const x=async()=>{await Je.entities.LogEntry.create({...m,timestamp:new Date().toISOString()}),w({title:\"Log ent"
+  },
+  {
+    "id": "cases",
+    "route": "/cases",
+    "comp": "pOe",
+    "title": "Case Management",
+    "codeLength": 6000,
+    "codeSample": "function pOe(){const[e,t]=_.useState([]),[n,r]=_.useState(!0),[i,o]=_.useState(\"\"),[a,s]=_.useState(!1),[l,u]=_.useState(null),[h,p]=_.useState(\"\"),[m,y]=_.useState({title:\"\",description:\"\",severity:\"medium\",priority:\"P3\"}),{toast:w}=fr(),v=()=>{r(!0),Je.entities.Incident.list(\"-created_date\",50).then(t).catch(()=>{}).finally(()=>r(!1))};_.useEffect(()=>{v()},[]);const x=async()=>{await Je.entities.Incident.create({...m,status:\"detection\"}),w({title:\"Case created\"}),s(!1),y({title:\"\",description"
+  },
+  {
+    "id": "analytics",
+    "route": "/analytics",
+    "comp": "vOe",
+    "title": "SOC Analytics",
+    "codeLength": 6000,
+    "codeSample": "function vOe(){return d.jsxs(\"div\",{className:\"space-y-6\",children:[d.jsxs(\"div\",{children:[d.jsx(\"h1\",{className:\"text-2xl font-bold text-white\",children:\"Analytics\"}),d.jsx(\"p\",{className:\"text-sm text-white/40 mt-1\",children:\"SOC performance metrics and security trends\"})]}),d.jsx(\"div\",{className:\"grid grid-cols-2 md:grid-cols-4 gap-3\",children:[{label:\"Mean Time to Detect\",value:\"4.2m\",change:\"-18%\",up:!1},{label:\"Mean Time to Respond\",value:\"23m\",change:\"-12%\",up:!1},{label:\"Alert Closure "
+  },
+  {
+    "id": "ai-assistant",
+    "route": "/ai-assistant",
+    "comp": "FIe",
+    "title": "AI Security Assistant",
+    "codeLength": 6000,
+    "codeSample": "function FIe(){const[e,t]=_.useState([]),[n,r]=_.useState(\"\"),[i,o]=_.useState(!1),a=async s=>{const l=s||n;if(!l.trim())return;const u=[...e,{role:\"user\",content:l}];t(u),r(\"\"),o(!0);const h=`You are VRSOC AI Security Assistant — an expert cybersecurity educator embedded in a SOC training platform. \nYour role is to teach and explain security concepts clearly.\n\nFor every security topic or alert, explain:\n- What happened and why it matters\n- Which MITRE ATT&CK technique is relevant\n- What logs or"
+  },
+  {
+    "id": "knowledge",
+    "route": "/knowledge",
+    "comp": "zIe",
+    "title": "Knowledge Center",
+    "codeLength": 6000,
+    "codeSample": "function zIe(){const[e,t]=_.useState(\"\"),[n,r]=_.useState(\"all\"),[i,o]=_.useState(null),a=[...new Set($j.map(l=>l.category))],s=$j.filter(l=>{const u=!e||l.title.toLowerCase().includes(e.toLowerCase())||l.category.toLowerCase().includes(e.toLowerCase()),h=n===\"all\"||l.category===n;return u&&h});if(i){const l=$j.find(u=>u.title===i);return d.jsxs(\"div\",{className:\"space-y-6\",children:[d.jsx(\"button\",{onClick:()=>o(null),className:\"text-sm text-vr-accent hover:text-vr-accent/80 flex items-center g"
+  },
+  {
+    "id": "settings",
+    "route": "/settings",
+    "comp": "YIe",
+    "title": "Settings",
+    "codeLength": 6000,
+    "codeSample": "function YIe(){const[e,t]=_.useState(null);return fr(),_.useEffect(()=>{Je.auth.me().then(t).catch(()=>{})},[]),d.jsxs(\"div\",{className:\"space-y-6 max-w-4xl\",children:[d.jsxs(\"div\",{children:[d.jsx(\"h1\",{className:\"text-2xl font-bold text-white\",children:\"Settings\"}),d.jsx(\"p\",{className:\"text-sm text-white/40 mt-1\",children:\"Manage your profile and platform preferences\"})]}),d.jsxs($K,{defaultValue:\"profile\",className:\"w-full\",children:[d.jsxs($2,{className:\"bg-white/5 border border-white/5\",ch"
+  },
+  {
+    "id": "soar-dashboard",
+    "route": "/soar",
+    "comp": "sDe",
+    "title": "SOAR Dashboard",
+    "codeLength": 6000,
+    "codeSample": "function sDe(){const[e,t]=_.useState([]),[n,r]=_.useState([]),[i,o]=_.useState([]);_.useEffect(()=>{Je.entities.SOARPlaybook.list(\"-created_date\",50).then(t).catch(()=>{}),Je.entities.SOARCase.list(\"-created_date\",50).then(r).catch(()=>{}),Je.entities.SOARApproval.list(\"-created_date\",50).then(o).catch(()=>{})},[]);const a=Fj.filter(u=>u.status===\"running\").length,s=Fj.filter(u=>u.status===\"failed\").length,l=[{label:\"Total Incidents\",value:\"1,247\",icon:Jh,accent:\"red\"},{label:\"Automated Response"
+  },
+  {
+    "id": "soar-automation",
+    "route": "/soar/automation",
+    "comp": "cDe",
+    "title": "SOAR Automation Pipeline",
+    "codeLength": 6000,
+    "codeSample": "function cDe(){const[e,t]=_.useState({}),[n,r]=_.useState(!1),[i,o]=_.useState(-1),[a,s]=_.useState(0),[l,u]=_.useState([]),h=_.useRef(null),p=_.useRef(null),m=()=>{t({}),o(-1),r(!1),s(0),u([]),h.current&&clearInterval(h.current)},y=b=>{const j=new Date().toLocaleTimeString();u(k=>[...k,`[${j}] ${b}`]),setTimeout(()=>{var k;return(k=p.current)==null?void 0:k.scrollIntoView({behavior:\"smooth\"})},50)},w=()=>{m(),r(!0),o(0),y(\"Pipeline initiated — processing alert INC-2026-0342\"),y(\"Source: SIEM Co"
+  },
+  {
+    "id": "soar-playbooks",
+    "route": "/soar/playbooks",
+    "comp": "dDe",
+    "title": "SOAR Playbooks",
+    "codeLength": 6000,
+    "codeSample": "function dDe(){const[e,t]=_.useState([]),[n,r]=_.useState(!0),[i,o]=_.useState(\"\"),[a,s]=_.useState(\"all\"),[l,u]=_.useState(\"all\"),[h,p]=_.useState(null),{toast:m}=fr(),y=()=>{r(!0),Je.entities.SOARPlaybook.list(\"-created_date\",100).then(t).catch(()=>{}).finally(()=>r(!1))};_.useEffect(()=>{y()},[]);const w=A=>{m({title:\"Playbook executed\",description:`${A.name} is now running in simulation mode.`}),y()},v=async A=>{await Je.entities.SOARPlaybook.create({...A,name:`${A.name} (Copy)`,status:\"draf"
+  },
+  {
+    "id": "soar-builder",
+    "route": "/soar/builder",
+    "comp": "hDe",
+    "title": "SOAR Playbook Builder",
+    "codeLength": 6000,
+    "codeSample": "function hDe(){const[e,t]=_.useState([{id:1,type:\"trigger\",label:\"Trigger\",x:60,y:120},{id:2,type:\"threat_intel\",label:\"Threat Intel\",x:280,y:120},{id:3,type:\"ai_decision\",label:\"AI Decision\",x:500,y:120},{id:4,type:\"firewall\",label:\"Firewall Block\",x:720,y:60},{id:5,type:\"endpoint\",label:\"Isolate Endpoint\",x:720,y:180},{id:6,type:\"ticket\",label:\"Create Ticket\",x:940,y:120},{id:7,type:\"end\",label:\"End\",x:1160,y:120}]),[n,r]=_.useState([{from:1,to:2},{from:2,to:3},{from:3,to:4},{from:3,to:5},{fro"
+  },
+  {
+    "id": "soar-enrichment",
+    "route": "/soar/enrichment",
+    "comp": "mDe",
+    "title": "SOAR Threat Enrichment",
+    "codeLength": 6000,
+    "codeSample": "function mDe(){const[e,t]=_.useState(\"185.220.101.42\"),[n,r]=_.useState(!0),[i,o]=_.useState(!1),a=()=>{o(!0),r(!1),setTimeout(()=>{o(!1),r(!0)},1500)};return d.jsxs(\"div\",{className:\"space-y-6\",children:[d.jsxs(\"div\",{children:[d.jsx(\"h1\",{className:\"text-2xl font-bold text-white\",children:\"Threat Enrichment\"}),d.jsx(\"p\",{className:\"text-sm text-white/40 mt-1\",children:\"Automatically enrich every incident with multi-source threat intelligence\"})]}),d.jsxs(\"div\",{className:\"glass rounded-xl p-5 "
+  },
+  {
+    "id": "soar-ai-engine",
+    "route": "/soar/ai-engine",
+    "comp": "yDe",
+    "title": "SOAR AI Decision Engine",
+    "codeLength": 6000,
+    "codeSample": "function yDe(){const[e,t]=_.useState(new Set([\"malware\",\"intel\",\"asset\"])),n=o=>{t(a=>{const s=new Set(a);return s.has(o)?s.delete(o):s.add(o),s})},r=_.useMemo(()=>Math.min(100,bF.filter(o=>e.has(o.id)).reduce((o,a)=>o+a.points,0)),[e]),i=_.useMemo(()=>r<=20?jc[0]:r<=40?jc[1]:r<=60?jc[2]:r<=80?jc[3]:jc[4],[r]);return d.jsxs(\"div\",{className:\"space-y-6\",children:[d.jsxs(\"div\",{children:[d.jsx(\"h1\",{className:\"text-2xl font-bold text-white\",children:\"AI Decision Engine\"}),d.jsx(\"p\",{className:\"tex"
+  },
+  {
+    "id": "soar-actions",
+    "route": "/soar/actions",
+    "comp": "vDe",
+    "title": "SOAR Response Actions",
+    "codeLength": 6000,
+    "codeSample": "function vDe(){const[e,t]=_.useState({}),n=i=>{t(o=>({...o,[i]:\"running\"})),setTimeout(()=>{const o=Math.random()>.05;t(a=>({...a,[i]:o?\"success\":\"failed\"})),setTimeout(()=>{t(a=>{const s={...a};return delete s[i],s})},3e3)},1500+Math.random()*1500)},r=wF.reduce((i,o)=>i+o.actions.length,0);return d.jsxs(\"div\",{className:\"space-y-6\",children:[d.jsxs(\"div\",{className:\"flex items-center justify-between\",children:[d.jsxs(\"div\",{children:[d.jsx(\"h1\",{className:\"text-2xl font-bold text-white\",childre"
+  },
+  {
+    "id": "soar-approvals",
+    "route": "/soar/approvals",
+    "comp": "bDe",
+    "title": "SOAR Approvals",
+    "codeLength": 6000,
+    "codeSample": "function bDe(){const[e,t]=_.useState([]),[n,r]=_.useState(!0),[i,o]=_.useState(\"pending\"),[a,s]=_.useState(null),[l,u]=_.useState(\"\"),{toast:h}=fr(),p=()=>{r(!0),Je.entities.SOARApproval.list(\"-created_date\",50).then(t).catch(()=>{}).finally(()=>r(!1))};_.useEffect(()=>{p()},[]);const m=e.length>0?e:xDe,y=i===\"all\"?m:m.filter(b=>b.status===i),w=async b=>{e.length>0?(await Je.entities.SOARApproval.update(b.id,{status:\"approved\",approver:\"admin@vrsoc.com\",comment:l||\"Approved\"}),p()):t(j=>j.map(k="
+  },
+  {
+    "id": "soar-cases",
+    "route": "/soar/cases",
+    "comp": "_De",
+    "title": "SOAR Cases",
+    "codeLength": 6000,
+    "codeSample": "function _De(){const[e,t]=_.useState([]),[n,r]=_.useState(!0),[i,o]=_.useState(\"\"),[a,s]=_.useState(null),[l,u]=_.useState(!1),[h,p]=_.useState({incident_title:\"\",analyst:\"\",owner:\"\",priority:\"P3\",root_cause:\"\",containment_actions:\"\",recovery_actions:\"\"}),{toast:m}=fr(),y=()=>{r(!0),Je.entities.SOARCase.list(\"-created_date\",50).then(t).catch(()=>{}).finally(()=>r(!1))};_.useEffect(()=>{y()},[]);const w=e.length>0?e:wDe,v=w.filter(j=>{var k,A;return!i||((k=j.incident_title)==null?void 0:k.toLower"
+  },
+  {
+    "id": "soar-incident-detail",
+    "route": "/soar/incident/:id",
+    "comp": "kDe",
+    "title": "SOAR Incident Detail",
+    "codeLength": 6000,
+    "codeSample": "function kDe(){const{id:e}=nte(),t=Xu(),[n,r]=_.useState(null),[i,o]=_.useState(!0);_.useEffect(()=>{if(!e){o(!1);return}Je.entities.Alert.get(e).then(r).catch(()=>{}).finally(()=>o(!1))},[e]);const a=n||jDe;return d.jsxs(\"div\",{className:\"space-y-6\",children:[d.jsxs(\"div\",{className:\"flex items-center gap-3\",children:[d.jsx(Me,{variant:\"ghost\",size:\"icon\",onClick:()=>t(-1),className:\"text-white/40 hover:text-white hover:bg-white/5\",children:d.jsx(IC,{className:\"w-4 h-4\"})}),d.jsxs(\"div\",{classN"
+  },
+  {
+    "id": "soar-history",
+    "route": "/soar/history",
+    "comp": "CDe",
+    "title": "SOAR Execution History",
+    "codeLength": 6000,
+    "codeSample": "function CDe(){const[e,t]=_.useState([]),[n,r]=_.useState(!0),[i,o]=_.useState(\"\"),[a,s]=_.useState(\"all\"),{toast:l}=fr(),u=()=>{r(!0),Je.entities.SOARAutomation.list(\"-created_date\",100).then(t).catch(()=>{}).finally(()=>r(!1))};_.useEffect(()=>{u()},[]);const h=e.length>0?e:ADe,p=h.filter(y=>{var x,b;const w=!i||((x=y.incident)==null?void 0:x.toLowerCase().includes(i.toLowerCase()))||((b=y.playbook)==null?void 0:b.toLowerCase().includes(i.toLowerCase())),v=a===\"all\"||y.status===a;return w&&v})"
+  },
+  {
+    "id": "soar-live",
+    "route": "/soar/live",
+    "comp": "PDe",
+    "title": "SOAR Live Execution",
+    "codeLength": 6000,
+    "codeSample": "function PDe(){const[e,t]=_.useState(!1),[n,r]=_.useState(-1),[i,o]=_.useState(new Set),[a,s]=_.useState(0),[l,u]=_.useState([]),h=_.useRef(null),p=_.useRef(null),m=()=>{t(!1),r(-1),o(new Set),s(0),u([]),h.current&&clearInterval(h.current)},y=()=>{m(),t(!0),r(0),u([{time:new Date().toLocaleTimeString(),msg:\"Live execution started — processing alert INC-2026-0342\",type:\"info\"}])};_.useEffect(()=>{if(!e||n<0)return;const v=vf[n];if(!v){t(!1);return}u(b=>[...b,{time:new Date().toLocaleTimeString(),"
+  },
+  {
+    "id": "soar-reports",
+    "route": "/soar/reports",
+    "comp": "EDe",
+    "title": "SOAR Reports",
+    "codeLength": 6000,
+    "codeSample": "function EDe(){var y;const[e,t]=_.useState(\"incident\"),[n,r]=_.useState(\"INC-2026-0342\"),[i,o]=_.useState(!1),[a,s]=_.useState(!1),[l,u]=_.useState(\"\"),{toast:h}=fr(),p=()=>{o(!0),s(!1),u(\"\"),setTimeout(()=>{o(!1),s(!0);const w=_F.find(x=>x.id===n),v=Uj.find(x=>x.id===e);u(`${v.name}\n${\"=\".repeat(50)}\n\nIncident ID: ${w.id}\nIncident Title: ${w.title}\nRisk Score: ${w.risk}/100\nSeverity: Critical\nGenerated: ${new Date().toLocaleString()}\n\n---\n\nEXECUTIVE SUMMARY\n${\"-\".repeat(20)}\nOn July 16, 2026, t"
+  },
+  {
+    "id": "soar-simulation",
+    "route": "/soar/simulation",
+    "comp": "TDe",
+    "title": "SOAR Simulation",
+    "codeLength": 6000,
+    "codeSample": "function TDe(){const[e,t]=_.useState(null),[n,r]=_.useState(0),i=Xu(),{toast:o}=fr(),a=[\"Generating incident...\",\"Feeding to SOAR pipeline...\",\"Triggering playbook...\",\"Redirecting to Live View...\"],s=l=>{t(l.id),r(0),o({title:\"Simulation started\",description:`${l.name} — generating incident...`});let u=0;const h=setInterval(()=>{u++,u<a.length?r(u):(clearInterval(h),t(null),i(\"/soar/live\"))},1e3)};return d.jsxs(\"div\",{className:\"space-y-6\",children:[d.jsxs(\"div\",{className:\"flex items-center ju"
+  },
+  {
+    "id": "soar-settings",
+    "route": "/soar/settings",
+    "comp": "RDe",
+    "title": "SOAR Settings",
+    "codeLength": 6000,
+    "codeSample": "function RDe(){const[e,t]=_.useState(\"semi\"),[n,r]=_.useState(60),{toast:i}=fr(),o=()=>i({title:\"Settings saved\",description:\"SOAR configuration updated.\"});return d.jsxs(\"div\",{className:\"space-y-6 max-w-4xl\",children:[d.jsxs(\"div\",{children:[d.jsx(\"h1\",{className:\"text-2xl font-bold text-white\",children:\"SOAR Settings\"}),d.jsx(\"p\",{className:\"text-sm text-white/40 mt-1\",children:\"Configure automation, integrations, and policies\"})]}),d.jsxs($K,{defaultValue:\"automation\",children:[d.jsx($2,{cla"
+  },
+  {
+    "id": "login",
+    "route": "/login",
+    "comp": "koe",
+    "title": "Login",
+    "codeLength": 6000,
+    "codeSample": "function koe(){const[e,t]=_.useState(\"\"),[n,r]=_.useState(\"\"),[i,o]=_.useState(\"\"),[a,s]=_.useState(!1),l=async h=>{h.preventDefault(),o(\"\"),s(!0);try{await Je.auth.loginViaEmailPassword(e,n),window.location.href=\"/\"}catch(p){o(p.message||\"Invalid email or password\")}finally{s(!1)}},u=()=>{Je.auth.loginWithProvider(\"google\",\"/\")};return d.jsxs(hu,{icon:vQ,title:\"Welcome back\",subtitle:\"Log in to your account\",footer:d.jsxs(d.Fragment,{children:[\"Don't have an account?\",\" \",d.jsx(gl,{to:\"/registe"
+  },
+  {
+    "id": "register",
+    "route": "/register",
+    "comp": "Foe",
+    "title": "Register",
+    "codeLength": 6000,
+    "codeSample": "function Foe(){const[e,t]=_.useState(\"\"),[n,r]=_.useState(\"\"),[i,o]=_.useState(\"\"),[a,s]=_.useState(\"\"),[l,u]=_.useState(!1),[h,p]=_.useState(!1),[m,y]=_.useState(\"\"),w=async j=>{if(j.preventDefault(),s(\"\"),n!==i){s(\"Passwords do not match\");return}u(!0);try{await Je.auth.register({email:e,password:n}),p(!0)}catch(k){s(k.message||\"Registration failed\")}finally{u(!1)}},v=async()=>{s(\"\"),u(!0);try{const j=await Je.auth.verifyOtp({email:e,otpCode:m});j!=null&&j.access_token&&Je.auth.setToken(j.acce"
+  },
+  {
+    "id": "forgot-password",
+    "route": "/forgot-password",
+    "comp": "zoe",
+    "title": "Forgot Password",
+    "codeLength": 6000,
+    "codeSample": "function zoe(){const[e,t]=_.useState(\"\"),[n,r]=_.useState(!1),[i,o]=_.useState(!1),a=async s=>{s.preventDefault(),r(!0);try{await Je.auth.resetPasswordRequest(e)}catch{}finally{r(!1),o(!0)}};return d.jsx(hu,{icon:ea,title:\"Reset password\",subtitle:\"We'll send you a link to reset it\",footer:d.jsxs(gl,{to:\"/login\",className:\"text-primary font-medium hover:underline\",children:[d.jsx(IC,{className:\"w-3 h-3 inline mr-1\"}),\"Back to log in\"]}),children:i?d.jsx(\"p\",{className:\"text-sm text-foreground te"
+  },
+  {
+    "id": "reset-password",
+    "route": "/reset-password",
+    "comp": "Uoe",
+    "title": "Reset Password",
+    "codeLength": 6000,
+    "codeSample": "function Uoe(){const[e]=Ote(),t=e.get(\"token\"),[n,r]=_.useState(\"\"),[i,o]=_.useState(\"\"),[a,s]=_.useState(\"\"),[l,u]=_.useState(!1),h=async p=>{if(p.preventDefault(),s(\"\"),n!==i){s(\"Passwords do not match\");return}u(!0);try{await Je.auth.resetPassword({resetToken:t,newPassword:n}),window.location.href=\"/login\"}catch(m){s(m.message||\"Failed to reset password\")}finally{u(!1)}};return t?d.jsxs(hu,{icon:ll,title:\"New password\",subtitle:\"Enter your new password below\",children:[a&&d.jsx(\"div\",{classNa"
+  },
+  {
+    "id": "not-found",
+    "route": "*",
+    "comp": "aoe",
+    "title": "Not Found",
+    "codeLength": 6000,
+    "codeSample": "function aoe({}){var i;const t=jo().pathname.substring(1),{data:n,isFetched:r}=bee({queryKey:[\"user\"],queryFn:async()=>{try{return{user:await Je.auth.me(),isAuthenticated:!0}}catch{return{user:null,isAuthenticated:!1}}}});return d.jsx(\"div\",{className:\"min-h-screen flex items-center justify-center p-6 bg-slate-50\",children:d.jsx(\"div\",{className:\"max-w-md w-full\",children:d.jsxs(\"div\",{className:\"text-center space-y-6\",children:[d.jsxs(\"div\",{className:\"space-y-2\",children:[d.jsx(\"h1\",{className"
+  }
+]

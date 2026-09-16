@@ -1,0 +1,174 @@
+# ==========================================
+# VRSOC - Git Ignore
+# ==========================================
+
+# ------------------------------------------
+# Dependencies
+# ------------------------------------------
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/
+.yarn-cache/
+
+# ------------------------------------------
+# Next.js
+# ------------------------------------------
+.next/
+out/
+.vercel/
+
+# ------------------------------------------
+# Build / generated output
+# ------------------------------------------
+dist/
+build/
+coverage/
+.turbo/
+.cache/
+tmp/
+temp/
+
+# ------------------------------------------
+# Environment / Secrets
+# ------------------------------------------
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
+
+# Keep example environment files tracked
+!.env.example
+!.env.template
+
+# ------------------------------------------
+# Supabase local / generated files
+# ------------------------------------------
+supabase/.branches/
+supabase/.temp/
+supabase/.branches/*
+supabase/.temp/*
+
+# Local Supabase generated/runtime data
+supabase/.data/
+
+# ------------------------------------------
+# Logs
+# ------------------------------------------
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+logs/
+*.log.*
+
+# ------------------------------------------
+# Testing
+# ------------------------------------------
+playwright-report/
+test-results/
+blob-report/
+.nyc_output/
+
+# ------------------------------------------
+# TypeScript
+# ------------------------------------------
+*.tsbuildinfo
+
+# ------------------------------------------
+# ESLint / tooling caches
+# ------------------------------------------
+.eslintcache
+.stylelintcache
+
+# ------------------------------------------
+# IDE / Editors
+# ------------------------------------------
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# ------------------------------------------
+# OS files
+# ------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+Desktop.ini
+
+# ------------------------------------------
+# Temporary / backup files
+# ------------------------------------------
+*.tmp
+*.temp
+*.bak
+*.backup
+*.swp
+*.swo
+*~
+*.orig
+
+# ------------------------------------------
+# Certificates / private keys
+# ------------------------------------------
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# ------------------------------------------
+# Local databases
+# ------------------------------------------
+*.sqlite
+*.sqlite3
+*.db
+
+# ------------------------------------------
+# Generated documentation artifacts
+# ------------------------------------------
+docs/generated/
+docs/.cache/
+
+# ------------------------------------------
+# Screenshots / browser artifacts
+# Keep committed reference screenshots under
+# docs/reverse-engineering/screenshots/
+# ------------------------------------------
+artifacts/
+browser-artifacts/
+browser-recordings/
+
+# ------------------------------------------
+# Antigravity / agent temporary files
+# ------------------------------------------
+.antigravity/
+.agent/
+.agents/
+.agent-cache/
+.agent-work/
+.agent-tmp/
+
+# Don't accidentally commit generic local
+# agent scratch files
+*.agent.json
+*.agent.tmp
+
+# ------------------------------------------
+# OS / local tooling
+# ------------------------------------------
+.history/
+.local/
