@@ -33,14 +33,36 @@ export const LoginSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
-export const RegisterSchema = z.object({
+export const RegisterSchema = z
+  .object({
+    email: z.string().email("Invalid email address"),
+    fullName: z.string().min(2, "Full name must be at least 2 characters"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string().min(8, "Password must be at least 8 characters"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+export const ForgotPasswordSchema = z.object({
   email: z.string().email("Invalid email address"),
-  fullName: z.string().min(2, "Full name must be at least 2 characters"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  confirmPassword: z.string().min(8, "Password must be at least 8 characters"),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"],
+});
+
+export const ResetPasswordSchema = z
+  .object({
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string().min(8, "Password must be at least 8 characters"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+export const VerifyOtpSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  token: z.string().length(6, "OTP code must be 6 digits"),
+  type: z.enum(["signup", "recovery", "email", "magiclink"]).default("signup"),
 });
 
 export const HostIsolationSchema = z.object({
@@ -73,6 +95,10 @@ export const ServerEnvSchema = ClientEnvSchema.extend({
   ANTHROPIC_API_KEY: z.string().optional(),
 });
 
+export type LoginInput = z.infer<typeof LoginSchema>;
+export type RegisterInput = z.infer<typeof RegisterSchema>;
+export type ForgotPasswordInput = z.infer<typeof ForgotPasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof ResetPasswordSchema>;
+export type VerifyOtpInput = z.infer<typeof VerifyOtpSchema>;
 export type ClientEnv = z.infer<typeof ClientEnvSchema>;
 export type ServerEnv = z.infer<typeof ServerEnvSchema>;
-

@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "../utils";
 import { Search, Bell, Menu, ChevronDown, Building2 } from "lucide-react";
 import { Breadcrumbs, type BreadcrumbItem } from "./Breadcrumbs";

@@ -1,15 +1,12 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("VRSOC Application Bootstrap Smoke Test", () => {
-  test("renders bootstrap verification page with Base44 cyber theme", async ({ page }) => {
+  test("renders bootstrap verification entrypoint with Base44 cyber theme", async ({ page }) => {
     await page.goto("/");
 
-    // Verify title and brand presence
+    // Verify redirect to login when unauthenticated and check title/brand
     await expect(page).toHaveTitle(/VRSOC/);
-    await expect(page.locator("h1")).toContainText("VRSOC — Cyber Defense Training");
-
-    // Verify system operational badge
-    await expect(page.getByText("SYSTEM OPERATIONAL — BOOTSTRAP READY")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Welcome back" })).toBeVisible();
 
     // Verify background color invariant (#0A0A0A)
     const body = page.locator("body");
