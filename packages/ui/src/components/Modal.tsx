@@ -45,6 +45,9 @@ export function Modal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150">
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
         className={cn(
           "w-full bg-[#161616] border border-white/15 rounded-2xl shadow-2xl shadow-black/80 overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col",
           sizeStyles[size]

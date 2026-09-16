@@ -91,6 +91,84 @@ export const CreateTeamSchema = z.object({
   description: z.string().max(255).optional(),
 });
 
+export const PermissionSchema = z.enum([
+  // Identity & Organizations
+  "org:members:invite",
+  "org:members:remove",
+  "org:members:update_role",
+  "org:settings:manage",
+  "org:api_keys:manage",
+  // SOC Telemetry & Agents
+  "agents:read",
+  "agents:isolate",
+  "agents:restart",
+  "agents:collect_logs",
+  "telemetry:read",
+  "telemetry:query",
+  // Detections & MITRE
+  "detections:read",
+  "detections:create",
+  "detections:update",
+  "detections:delete",
+  "detections:test",
+  "mitre:read",
+  "mitre:simulate",
+  // Alerts & Incidents
+  "alerts:read",
+  "alerts:triage",
+  "alerts:comment",
+  "alerts:escalate",
+  "incidents:read",
+  "incidents:create",
+  "incidents:update_status",
+  "incidents:assign",
+  "incidents:close",
+  // Cases & Evidence
+  "cases:read",
+  "cases:create",
+  "cases:add_evidence",
+  "cases:add_notes",
+  "cases:close",
+  // SOAR & Automation
+  "soar:playbooks:read",
+  "soar:playbooks:create",
+  "soar:playbooks:update",
+  "soar:playbooks:execute",
+  "soar:actions:execute",
+  "soar:approvals:manage",
+  // Training & Simulation
+  "simulation:scenarios:read",
+  "simulation:scenarios:create",
+  "simulation:scenarios:launch",
+  "training:cohorts:manage",
+  "training:quizzes:take",
+  "training:submissions:grade",
+  // Compliance & GRC
+  "compliance:read",
+  "compliance:update_controls",
+  "compliance:export",
+  // Audit & Reporting
+  "reports:generate",
+  "reports:export",
+  "audit:read",
+]);
+
+export const UpdateMemberRoleSchema = z.object({
+  organizationId: z.string().uuid("Invalid organization ID format"),
+  targetUserId: z.string().uuid("Invalid target user ID format"),
+  newRole: UserRoleSchema,
+});
+
+export const RemoveMemberSchema = z.object({
+  organizationId: z.string().uuid("Invalid organization ID format"),
+  targetUserId: z.string().uuid("Invalid target user ID format"),
+});
+
+export const CheckPermissionSchema = z.object({
+  organizationId: z.string().uuid("Invalid organization ID format"),
+  permission: PermissionSchema,
+});
+
 export const HostIsolationSchema = z.object({
   assetId: z.string().uuid("Invalid asset ID format"),
   reason: z.string().min(5, "Isolation reason must be at least 5 characters"),
@@ -128,6 +206,9 @@ export type ResetPasswordInput = z.infer<typeof ResetPasswordSchema>;
 export type VerifyOtpInput = z.infer<typeof VerifyOtpSchema>;
 export type CreateOrganizationInput = z.infer<typeof CreateOrganizationSchema>;
 export type InviteMemberInput = z.infer<typeof InviteMemberSchema>;
+export type UpdateMemberRoleInput = z.infer<typeof UpdateMemberRoleSchema>;
+export type RemoveMemberInput = z.infer<typeof RemoveMemberSchema>;
+export type CheckPermissionInput = z.infer<typeof CheckPermissionSchema>;
 export type CreateTeamInput = z.infer<typeof CreateTeamSchema>;
 export type ClientEnv = z.infer<typeof ClientEnvSchema>;
 export type ServerEnv = z.infer<typeof ServerEnvSchema>;

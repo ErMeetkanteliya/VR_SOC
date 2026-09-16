@@ -31,6 +31,7 @@ import {
   Toast,
 } from "@vrsoc/ui";
 import { OrganizationSwitcher } from "@/components/tenant/OrganizationSwitcher";
+import { MemberRoleManager } from "@/components/rbac/MemberRoleManager";
 import type { Organization, Membership } from "@vrsoc/types";
 import {
   ShieldAlert,
@@ -43,12 +44,14 @@ import {
   Terminal,
   RotateCcw,
   Sparkles,
+  Users,
 } from "lucide-react";
 
 export default function DesignSystemShowcasePage() {
   const [activeTab, setActiveTab] = useState("components");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isRoleManagerOpen, setIsRoleManagerOpen] = useState(false);
   const [toggleState, setToggleState] = useState(true);
   const [checkboxState, setCheckboxState] = useState(true);
 
@@ -182,7 +185,7 @@ export default function DesignSystemShowcasePage() {
     updated_at: new Date().toISOString(),
   };
 
-  const demoMemberships: Membership[] = [
+  const demoUserOrgs: Membership[] = [
     {
       id: "mem-01",
       user_id: "usr-01",
@@ -212,6 +215,41 @@ export default function DesignSystemShowcasePage() {
     },
   ];
 
+  const demoOrgMembers: Membership[] = [
+    {
+      id: "mem-01",
+      user_id: "usr-01",
+      organization_id: "org-demo-01",
+      role: "Super Admin",
+      status: "active",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      organization: demoOrg,
+      profile: {
+        id: "usr-01",
+        email: "alex.mercer@cda.internal",
+        full_name: "Alex Mercer (SecOps Lead)",
+        created_at: new Date().toISOString(),
+      },
+    },
+    {
+      id: "mem-03",
+      user_id: "usr-02",
+      organization_id: "org-demo-01",
+      role: "SOC Analyst",
+      status: "active",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      organization: demoOrg,
+      profile: {
+        id: "usr-02",
+        email: "jordan.vance@cda.internal",
+        full_name: "Jordan Vance (Tier-2 Analyst)",
+        created_at: new Date().toISOString(),
+      },
+    },
+  ];
+
   return (
     <AppShell currentPath="/design-system" commandItems={commandItems}>
       <div className="space-y-8 max-w-7xl mx-auto pb-16">
@@ -231,11 +269,19 @@ export default function DesignSystemShowcasePage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <OrganizationSwitcher
               currentOrganization={demoOrg}
-              memberships={demoMemberships}
+              memberships={demoUserOrgs}
             />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsRoleManagerOpen(true)}
+              leftIcon={<Users className="w-3.5 h-3.5 text-[#E53935]" />}
+            >
+              Manage Roles
+            </Button>
             <Button variant="outline" size="sm" onClick={() => setIsModalOpen(true)}>
               Launch Modal
             </Button>
@@ -550,6 +596,17 @@ export default function DesignSystemShowcasePage() {
             </div>
           </div>
         </Drawer>
+
+        {/* Interactive Member Role Manager Modal */}
+        <MemberRoleManager
+          isOpen={isRoleManagerOpen}
+          onClose={() => setIsRoleManagerOpen(false)}
+          organizationId={demoOrg.id}
+          organizationName={demoOrg.name}
+          currentUserRole="Super Admin"
+          currentUserId="usr-01"
+          initialMembers={demoOrgMembers}
+        />
       </div>
     </AppShell>
   );

@@ -8,7 +8,7 @@ import {
   type CreateOrganizationInput,
   type InviteMemberInput,
 } from "@vrsoc/validation";
-import type { Organization, Membership } from "@vrsoc/types";
+import type { Organization, Membership, UserRole } from "@vrsoc/types";
 
 export interface TenantActionResult<T = any> {
   success: boolean;
@@ -21,7 +21,7 @@ const ACTIVE_ORG_COOKIE = "vrsoc_active_org";
 /**
  * Resolves the active organization ID from request cookies or retrieves the first active membership.
  */
-export async function getActiveOrganization(): Promise<{ organization: Organization | null; role: string | null }> {
+export async function getActiveOrganization(): Promise<{ organization: Organization | null; role: UserRole | null }> {
   try {
     const supabase = await createServerSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -60,20 +60,16 @@ export async function getActiveOrganization(): Promise<{ organization: Organizat
       if (match && match.organization) {
         return {
           organization: match.organization as unknown as Organization,
-          role: match.role,
+          role: match.role as UserRole,
         };
       }
     }
 
     // Fallback to first active membership
     const primary = memberships[0];
-    if (!primary || !primary.organization) {
-      return { organization: null, role: null };
-    }
-
     return {
-      organization: primary.organization as unknown as Organization,
-      role: primary.role,
+      organization: primary?.organization as unknown as Organization,
+      role: (primary?.role as UserRole) || null,
     };
   } catch {
     return { organization: null, role: null };

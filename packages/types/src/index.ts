@@ -2,15 +2,92 @@
 // VRSOC — Core Domain Type Definitions
 // ==============================================================================
 
-export type UserRole =
-  | "Super Admin"
-  | "Instructor"
-  | "Student"
-  | "SOC Analyst"
-  | "Incident Responder"
-  | "Threat Hunter"
-  | "Auditor"
-  | "Viewer";
+export const ALL_USER_ROLES = [
+  "Super Admin",
+  "Instructor",
+  "Student",
+  "SOC Analyst",
+  "Incident Responder",
+  "Threat Hunter",
+  "Auditor",
+  "Viewer",
+] as const;
+
+export type UserRole = (typeof ALL_USER_ROLES)[number];
+
+export type Permission =
+  // Identity & Organizations
+  | "org:members:invite"
+  | "org:members:remove"
+  | "org:members:update_role"
+  | "org:settings:manage"
+  | "org:api_keys:manage"
+  // SOC Telemetry & Agents
+  | "agents:read"
+  | "agents:isolate"
+  | "agents:restart"
+  | "agents:collect_logs"
+  | "telemetry:read"
+  | "telemetry:query"
+  // Detections & MITRE
+  | "detections:read"
+  | "detections:create"
+  | "detections:update"
+  | "detections:delete"
+  | "detections:test"
+  | "mitre:read"
+  | "mitre:simulate"
+  // Alerts & Incidents
+  | "alerts:read"
+  | "alerts:triage"
+  | "alerts:comment"
+  | "alerts:escalate"
+  | "incidents:read"
+  | "incidents:create"
+  | "incidents:update_status"
+  | "incidents:assign"
+  | "incidents:close"
+  // Cases & Evidence
+  | "cases:read"
+  | "cases:create"
+  | "cases:add_evidence"
+  | "cases:add_notes"
+  | "cases:close"
+  // SOAR & Automation
+  | "soar:playbooks:read"
+  | "soar:playbooks:create"
+  | "soar:playbooks:update"
+  | "soar:playbooks:execute"
+  | "soar:actions:execute"
+  | "soar:approvals:manage"
+  // Training & Simulation
+  | "simulation:scenarios:read"
+  | "simulation:scenarios:create"
+  | "simulation:scenarios:launch"
+  | "training:cohorts:manage"
+  | "training:quizzes:take"
+  | "training:submissions:grade"
+  // Compliance & GRC
+  | "compliance:read"
+  | "compliance:update_controls"
+  | "compliance:export"
+  // Audit & Reporting
+  | "reports:generate"
+  | "reports:export"
+  | "audit:read";
+
+export interface AuthorizeOptions {
+  organizationId: string;
+  permission: Permission;
+}
+
+export interface AuthorizeResult {
+  authorized: boolean;
+  userId?: string;
+  organizationId?: string;
+  role?: UserRole;
+  error?: string;
+}
 
 export type MembershipStatus = "active" | "inactive" | "revoked" | "pending";
 
