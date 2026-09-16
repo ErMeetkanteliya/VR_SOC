@@ -434,6 +434,131 @@ export interface Incident {
   closed_at?: string;
 }
 
+// ------------------------------------------------------------------------------
+// Phase 12 Telemetry Engine & Simulation Pipeline Entities
+// ------------------------------------------------------------------------------
+
+export type SimulationScenarioCategory =
+  | "Authentication Attacks"
+  | "Endpoint Execution"
+  | "Persistence Mechanism"
+  | "Network Anomalies"
+  | "Hardware Additions"
+  | "Ransomware & Destruction"
+  | "Cloud & Identity";
+
+export type SimulationStatus = "Pending" | "Running" | "Completed" | "Failed" | "Cancelled";
+
+export interface SimulationScenarioStep {
+  step: number;
+  delay_ms: number;
+  description: string;
+  source: string;
+  source_type: string;
+  category: string;
+  event_type: string;
+  severity: SeverityLevel;
+  log_level: LogLevel;
+  log_message: string;
+  raw_log?: string;
+  mitre_tactic?: string;
+  mitre_technique?: string;
+  normalized_fields: Record<string, unknown>;
+  process?: {
+    name: string;
+    executablePath: string;
+    commandLine?: string;
+    sha256?: string;
+    integrityLevel?: "Low" | "Medium" | "High" | "System";
+  };
+  file?: {
+    path: string;
+    name: string;
+    extension?: string;
+    sizeBytes?: number;
+    sha256?: string;
+    isExecutable?: boolean;
+    isHidden?: boolean;
+  };
+  network?: {
+    srcIp: string;
+    dstIp: string;
+    srcPort: number;
+    dstPort: number;
+    protocol?: NetworkProtocol;
+    direction?: NetworkDirection;
+    status?: NetworkConnectionStatus;
+  };
+}
+
+export interface SimulationScenario {
+  id: string;
+  organization_id?: string | null;
+  slug: string;
+  name: string;
+  category: SimulationScenarioCategory;
+  severity: SeverityLevel;
+  description: string;
+  learning_outcome: string;
+  mitre_tactics: string[];
+  mitre_techniques: string[];
+  duration_seconds: number;
+  event_sequence: SimulationScenarioStep[];
+  is_system: boolean;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SimulationRun {
+  id: string;
+  organization_id: string;
+  scenario_id: string;
+  status: SimulationStatus;
+  target_asset_id?: string | null;
+  target_agent_id?: string | null;
+  target_identity_id?: string | null;
+  initiated_by?: string | null;
+  events_generated_count: number;
+  logs_generated_count: number;
+  error_message?: string | null;
+  metadata?: Record<string, unknown>;
+  started_at: string;
+  completed_at?: string | null;
+  created_at: string;
+  updated_at: string;
+  scenario?: SimulationScenario;
+  target_asset?: Asset;
+  target_agent?: Agent;
+  target_identity?: SocIdentity;
+}
+
+export interface SimulationRunEvent {
+  id: string;
+  organization_id: string;
+  simulation_run_id: string;
+  event_id: string;
+  sequence_number: number;
+  created_at: string;
+  event?: TelemetryEvent;
+}
+
+export interface TelemetryStats {
+  totalEvents: number;
+  totalLogs: number;
+  eventsLastHour: number;
+  activeSimulations: number;
+  severityBreakdown: {
+    critical: number;
+    high: number;
+    medium: number;
+    low: number;
+    informational: number;
+  };
+  categoryBreakdown: Record<string, number>;
+  sourceBreakdown: Record<string, number>;
+}
+
 export interface HealthCheckResponse {
   status: "operational" | "degraded" | "down";
   timestamp: string;
@@ -444,3 +569,4 @@ export interface HealthCheckResponse {
     telemetry: "active" | "standby";
   };
 }
+

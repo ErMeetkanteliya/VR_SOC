@@ -436,6 +436,76 @@ export const CreateNetworkConnectionSchema = z.object({
   metadata: z.record(z.unknown()).default({}),
 });
 
+// ------------------------------------------------------------------------------
+// Phase 12 Telemetry Engine & Simulation Pipeline Schemas
+// ------------------------------------------------------------------------------
+
+export const SimulationScenarioCategorySchema = z.enum([
+  "Authentication Attacks",
+  "Endpoint Execution",
+  "Persistence Mechanism",
+  "Network Anomalies",
+  "Hardware Additions",
+  "Ransomware & Destruction",
+  "Cloud & Identity",
+]);
+
+export const SimulationStatusSchema = z.enum([
+  "Pending",
+  "Running",
+  "Completed",
+  "Failed",
+  "Cancelled",
+]);
+
+export const LaunchSimulationSchema = z.object({
+  scenarioId: z.string().min(1, "Scenario ID is required"),
+  targetAssetId: z.string().optional().nullable(),
+  targetAgentId: z.string().optional().nullable(),
+  targetIdentityId: z.string().optional().nullable(),
+  parameters: z.record(z.unknown()).default({}),
+});
+
+export const CancelSimulationSchema = z.object({
+  simulationRunId: z.string().min(1, "Simulation run ID is required"),
+  reason: z.string().max(255).optional(),
+});
+
+export const FilterSimulationScenariosSchema = z.object({
+  category: z.string().optional(),
+  severity: z.string().optional(),
+  search: z.string().optional(),
+});
+
+export const FilterSimulationRunsSchema = z.object({
+  scenarioId: z.string().optional(),
+  status: z.string().optional(),
+  page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(1).max(100).default(10),
+});
+
+export const FilterTelemetryEventsSchema = z.object({
+  search: z.string().optional(),
+  category: z.string().optional(),
+  source: z.string().optional(),
+  severity: z.string().optional(),
+  assetId: z.string().optional(),
+  agentId: z.string().optional(),
+  simulationRunId: z.string().optional(),
+  page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(1).max(100).default(20),
+});
+
+export const FilterLogsSchema = z.object({
+  search: z.string().optional(),
+  logLevel: z.string().optional(),
+  facility: z.string().optional(),
+  serviceName: z.string().optional(),
+  sourceHost: z.string().optional(),
+  page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(1).max(100).default(20),
+});
+
 // Environment variable validation schemas
 export const ClientEnvSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),
@@ -479,5 +549,12 @@ export type IngestLogInput = z.infer<typeof IngestLogSchema>;
 export type CreateProcessRecordInput = z.infer<typeof CreateProcessRecordSchema>;
 export type CreateFileRecordInput = z.infer<typeof CreateFileRecordSchema>;
 export type CreateNetworkConnectionInput = z.infer<typeof CreateNetworkConnectionSchema>;
+export type LaunchSimulationInput = z.infer<typeof LaunchSimulationSchema>;
+export type CancelSimulationInput = z.infer<typeof CancelSimulationSchema>;
+export type FilterSimulationScenariosInput = z.infer<typeof FilterSimulationScenariosSchema>;
+export type FilterSimulationRunsInput = z.infer<typeof FilterSimulationRunsSchema>;
+export type FilterTelemetryEventsInput = z.infer<typeof FilterTelemetryEventsSchema>;
+export type FilterLogsInput = z.infer<typeof FilterLogsSchema>;
 export type ClientEnv = z.infer<typeof ClientEnvSchema>;
 export type ServerEnv = z.infer<typeof ServerEnvSchema>;
+
