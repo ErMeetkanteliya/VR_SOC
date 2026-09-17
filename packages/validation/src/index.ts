@@ -21,6 +21,11 @@ export const SeverityLevelSchema = z.enum([
   "Medium",
   "Low",
   "Informational",
+  "critical",
+  "high",
+  "medium",
+  "low",
+  "informational",
 ]);
 
 export const AlertStatusSchema = z.enum([
@@ -734,5 +739,155 @@ export type SiemTimelineQueryInput = z.infer<typeof SiemTimelineQuerySchema>;
 export type CreateSavedQueryInput = z.infer<typeof CreateSavedQuerySchema>;
 export type UpdateSavedQueryInput = z.infer<typeof UpdateSavedQuerySchema>;
 export type DeleteSavedQueryInput = z.infer<typeof DeleteSavedQuerySchema>;
+
+// ------------------------------------------------------------------------------
+// Phase 15 Detection & Correlation Rules Validation Schemas
+// ------------------------------------------------------------------------------
+
+export const RuleOperatorSchema = z.enum([
+  "equals",
+  "not_equals",
+  "contains",
+  "not_contains",
+  "starts_with",
+  "ends_with",
+  "in",
+  "not_in",
+  "greater_than",
+  "greater_than_or_equal",
+  "less_than",
+  "less_than_or_equal",
+  "exists",
+  "not_exists",
+  "regex",
+]);
+
+export const DetectionRuleTypeSchema = z.enum([
+  "single_event",
+  "threshold",
+  "correlation",
+  "sequence",
+]);
+
+export const FieldConditionSchema = z.object({
+  field: z.string().min(1, "Field name is required").max(64),
+  operator: RuleOperatorSchema,
+  value: z.unknown(),
+});
+
+// Recursive logical condition schema (bounded to prevent deep recursion)
+export const LogicalConditionGroupSchema: z.ZodType<any> = z.lazy(() =>
+  z.object({
+    operator: z.enum(["AND", "OR", "NOT"]).optional(),
+    logicalOperator: z.enum(["AND", "OR", "NOT"]).optional(),
+    conditions: z.array(
+      z.union([
+        FieldConditionSchema,
+        LogicalConditionGroupSchema,
+      ])
+    ).min(1, "Condition group must have at least one condition").max(20, "Condition group exceeds maximum 20 conditions limit"),
+  }).refine((data) => data.operator || data.logicalOperator, {
+    message: "Logical operator ('AND', 'OR', or 'NOT') is required",
+  })
+);
+
+export const RuleConditionSchema = z.union([
+  FieldConditionSchema,
+  LogicalConditionGroupSchema,
+]);
+
+export const CreateDetectionRuleSchema = z.object({
+  organization_id: z.string().uuid("Invalid organization ID format").optional(),
+  organizationId: z.string().uuid("Invalid organization ID format").optional(),
+  name: z.string().min(3, "Rule name must be at least 3 characters").max(255),
+  description: z.string().max(1000).optional(),
+  severity: SeverityLevelSchema.default("high"),
+  rule_type: DetectionRuleTypeSchema.optional(),
+  ruleType: DetectionRuleTypeSchema.optional(),
+  category: z.string().min(2).max(64).default("general"),
+  mitre_tactic: z.string().max(64).optional(),
+  mitreTactic: z.string().max(64).optional(),
+  mitre_technique_id: z.string().max(32).optional(),
+  mitreTechniqueId: z.string().max(32).optional(),
+  mitre_technique_name: z.string().max(128).optional(),
+  mitreTechniqueName: z.string().max(128).optional(),
+  is_enabled: z.boolean().optional(),
+  isEnabled: z.boolean().optional(),
+  evaluation_window_minutes: z.number().int().min(1).max(1440).optional(),
+  evaluationWindowMinutes: z.number().int().min(1).max(1440).optional(),
+  threshold_count: z.number().int().min(1).max(10000).optional(),
+  thresholdCount: z.number().int().min(1).max(10000).optional(),
+  conditions: RuleConditionSchema,
+  tags: z.array(z.string()).optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+export const UpdateDetectionRuleSchema = z.object({
+  id: z.string().min(1, "Rule ID is required"),
+  organization_id: z.string().uuid("Invalid organization ID format").optional(),
+  organizationId: z.string().uuid("Invalid organization ID format").optional(),
+  name: z.string().min(3).max(255).optional(),
+  description: z.string().max(1000).optional(),
+  severity: SeverityLevelSchema.optional(),
+  rule_type: DetectionRuleTypeSchema.optional(),
+  ruleType: DetectionRuleTypeSchema.optional(),
+  category: z.string().min(2).max(64).optional(),
+  mitre_tactic: z.string().max(64).optional(),
+  mitreTactic: z.string().max(64).optional(),
+  mitre_technique_id: z.string().max(32).optional(),
+  mitreTechniqueId: z.string().max(32).optional(),
+  mitre_technique_name: z.string().max(128).optional(),
+  mitreTechniqueName: z.string().max(128).optional(),
+  is_enabled: z.boolean().optional(),
+  isEnabled: z.boolean().optional(),
+  evaluation_window_minutes: z.number().int().min(1).max(1440).optional(),
+  evaluationWindowMinutes: z.number().int().min(1).max(1440).optional(),
+  threshold_count: z.number().int().min(1).max(10000).optional(),
+  thresholdCount: z.number().int().min(1).max(10000).optional(),
+  conditions: RuleConditionSchema.optional(),
+  tags: z.array(z.string()).optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+export const DeleteDetectionRuleSchema = z.object({
+  id: z.string().min(1, "Rule ID is required"),
+  organization_id: z.string().uuid("Invalid organization ID format").optional(),
+  organizationId: z.string().uuid("Invalid organization ID format").optional(),
+});
+
+export const ToggleDetectionRuleSchema = z.object({
+  id: z.string().min(1, "Rule ID is required"),
+  organization_id: z.string().uuid("Invalid organization ID format").optional(),
+  organizationId: z.string().uuid("Invalid organization ID format").optional(),
+  is_enabled: z.boolean().optional(),
+  isEnabled: z.boolean().optional(),
+});
+
+export const EvaluateDetectionRuleSchema = z.object({
+  rule_id: z.string().min(1, "Rule ID is required").optional(),
+  id: z.string().min(1).optional(),
+  organization_id: z.string().uuid("Invalid organization ID format").optional(),
+  organizationId: z.string().uuid("Invalid organization ID format").optional(),
+  time_window_minutes: z.number().int().min(1).max(1440).optional(),
+  timeWindowMinutes: z.number().int().min(1).max(1440).optional(),
+}).refine((data) => data.rule_id || data.id, {
+  message: "Rule ID (rule_id or id) is required",
+});
+
+export const EvaluateAllDetectionRulesSchema = z.object({
+  organization_id: z.string().uuid("Invalid organization ID format").optional(),
+  organizationId: z.string().uuid("Invalid organization ID format").optional(),
+  time_window_minutes: z.number().int().min(1).max(1440).optional(),
+  timeWindowMinutes: z.number().int().min(1).max(1440).optional(),
+  category: z.string().optional(),
+});
+
+export type CreateDetectionRuleInput = z.infer<typeof CreateDetectionRuleSchema>;
+export type UpdateDetectionRuleInput = z.infer<typeof UpdateDetectionRuleSchema>;
+export type DeleteDetectionRuleInput = z.infer<typeof DeleteDetectionRuleSchema>;
+export type ToggleDetectionRuleInput = z.infer<typeof ToggleDetectionRuleSchema>;
+export type EvaluateDetectionRuleInput = z.infer<typeof EvaluateDetectionRuleSchema>;
+export type EvaluateAllDetectionRulesInput = z.infer<typeof EvaluateAllDetectionRulesSchema>;
+
 
 

@@ -7,7 +7,7 @@ import { X } from "lucide-react";
 export interface DrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
+  title: React.ReactNode;
   subtitle?: string;
   children: React.ReactNode;
   footer?: React.ReactNode;

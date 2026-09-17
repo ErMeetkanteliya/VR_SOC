@@ -93,7 +93,17 @@ export type MembershipStatus = "active" | "inactive" | "revoked" | "pending";
 
 export type OrganizationStatus = "active" | "suspended" | "archived";
 
-export type SeverityLevel = "Critical" | "High" | "Medium" | "Low" | "Informational";
+export type SeverityLevel =
+  | "Critical"
+  | "High"
+  | "Medium"
+  | "Low"
+  | "Informational"
+  | "critical"
+  | "high"
+  | "medium"
+  | "low"
+  | "informational";
 
 export type AlertStatus =
   | "Open"
@@ -733,5 +743,151 @@ export interface CreateSavedQueryInput {
   filters: Partial<SiemFilterParams>;
   isPinned?: boolean;
 }
+
+// ------------------------------------------------------------------------------
+// Phase 15 Detection & Correlation Rules
+// ------------------------------------------------------------------------------
+
+export type DetectionRuleType =
+  | "single_event"
+  | "threshold"
+  | "correlation"
+  | "sequence";
+
+export type RuleOperator =
+  | "equals"
+  | "not_equals"
+  | "contains"
+  | "not_contains"
+  | "starts_with"
+  | "ends_with"
+  | "in"
+  | "not_in"
+  | "greater_than"
+  | "greater_than_or_equal"
+  | "less_than"
+  | "less_than_or_equal"
+  | "exists"
+  | "not_exists"
+  | "regex";
+
+export interface FieldCondition {
+  field: string;
+  operator: RuleOperator;
+  value: unknown;
+}
+
+export interface LogicalConditionGroup {
+  operator?: "AND" | "OR" | "NOT";
+  logicalOperator?: "AND" | "OR" | "NOT";
+  conditions: (FieldCondition | LogicalConditionGroup)[];
+}
+
+export type RuleCondition = FieldCondition | LogicalConditionGroup;
+
+export interface DetectionRule {
+  id: string;
+  organization_id?: string | null;
+  name: string;
+  description?: string | null;
+  severity: SeverityLevel;
+  rule_type: DetectionRuleType;
+  category: string;
+  mitre_tactic?: string | null;
+  mitre_technique_id?: string | null;
+  mitre_technique_name?: string | null;
+  is_enabled: boolean;
+  is_system: boolean;
+  evaluation_window_minutes?: number;
+  threshold_count?: number;
+  conditions: RuleCondition;
+  tags?: string[];
+  metadata?: Record<string, unknown>;
+  created_by?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateDetectionRuleInput {
+  organization_id?: string;
+  organizationId?: string;
+  name: string;
+  description?: string;
+  severity?: SeverityLevel;
+  rule_type?: DetectionRuleType;
+  ruleType?: DetectionRuleType;
+  category?: string;
+  mitre_tactic?: string;
+  mitreTactic?: string;
+  mitre_technique_id?: string;
+  mitreTechniqueId?: string;
+  mitre_technique_name?: string;
+  mitreTechniqueName?: string;
+  is_enabled?: boolean;
+  isEnabled?: boolean;
+  evaluation_window_minutes?: number;
+  evaluationWindowMinutes?: number;
+  threshold_count?: number;
+  thresholdCount?: number;
+  conditions: RuleCondition;
+  tags?: string[];
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateDetectionRuleInput {
+  id: string;
+  organization_id?: string;
+  organizationId?: string;
+  name?: string;
+  description?: string;
+  severity?: SeverityLevel;
+  rule_type?: DetectionRuleType;
+  ruleType?: DetectionRuleType;
+  category?: string;
+  mitre_tactic?: string;
+  mitreTactic?: string;
+  mitre_technique_id?: string;
+  mitreTechniqueId?: string;
+  mitre_technique_name?: string;
+  mitreTechniqueName?: string;
+  is_enabled?: boolean;
+  isEnabled?: boolean;
+  evaluation_window_minutes?: number;
+  evaluationWindowMinutes?: number;
+  threshold_count?: number;
+  thresholdCount?: number;
+  conditions?: RuleCondition;
+  tags?: string[];
+  metadata?: Record<string, unknown>;
+}
+
+export interface DetectionMatchExplanation {
+  ruleId: string;
+  ruleName: string;
+  matched: boolean;
+  summary: string;
+  details: string[];
+  evaluatedCount: number;
+  matchedCount: number;
+}
+
+export interface DetectionExecutionResult {
+  ruleId: string;
+  ruleName: string;
+  severity: SeverityLevel;
+  matched: boolean;
+  evaluatedAt: string;
+  evaluationWindow: {
+    start: string;
+    end: string;
+  };
+  matchedEventIds: string[];
+  matchedEvents: TelemetryEvent[];
+  primaryAssetId?: string | null;
+  primaryIdentityId?: string | null;
+  explanation: DetectionMatchExplanation;
+  metadata?: Record<string, unknown>;
+}
+
 
 

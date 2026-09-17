@@ -3,7 +3,17 @@ import { cn } from "../utils";
 import { VRSOC_DESIGN_TOKENS } from "../tokens";
 import { ShieldAlert, AlertTriangle, AlertCircle, Info } from "lucide-react";
 
-export type SeverityType = "Critical" | "High" | "Medium" | "Low" | "Informational";
+export type SeverityType =
+  | "Critical"
+  | "High"
+  | "Medium"
+  | "Low"
+  | "Informational"
+  | "critical"
+  | "high"
+  | "medium"
+  | "low"
+  | "informational";
 
 export interface SeverityBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   severity: SeverityType;
