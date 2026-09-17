@@ -111,7 +111,13 @@ export type AlertStatus =
   | "In Progress"
   | "Escalated"
   | "Closed"
-  | "False Positive";
+  | "False Positive"
+  | "open"
+  | "acknowledged"
+  | "in_progress"
+  | "escalated"
+  | "closed"
+  | "false_positive";
 
 export type IncidentStage =
   | "Detection"
@@ -425,17 +431,80 @@ export interface NetworkConnectionRecord {
 export interface Alert {
   id: string;
   organization_id: string;
+  rule_id?: string | null;
   alert_code: string;
   title: string;
   description: string;
   severity: SeverityLevel;
   risk_score: number;
   status: AlertStatus;
-  asset_id?: string;
-  mitre_technique_id?: string;
-  assignee_id?: string;
-  triggered_at: string;
-  closed_at?: string;
+  source: string;
+  occurred_at: string;
+  triggered_at?: string;
+  asset_id?: string | null;
+  agent_id?: string | null;
+  identity_id?: string | null;
+  matched_event_ids?: string[];
+  mitre_tactic?: string | null;
+  mitre_technique_id?: string | null;
+  mitre_technique_name?: string | null;
+  explanation?: DetectionMatchExplanation | Record<string, unknown> | null;
+  dedup_key: string;
+  assigned_to?: string | null;
+  assignee_id?: string | null;
+  assignee?: { id: string; email?: string; full_name?: string } | null;
+  asset?: Asset | null;
+  identity?: SocIdentity | null;
+  acknowledged_at?: string | null;
+  closed_at?: string | null;
+  closed_reason?: string | null;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AlertHistory {
+  id: string;
+  organization_id: string;
+  alert_id: string;
+  actor_id?: string | null;
+  actor?: { id: string; email?: string; full_name?: string } | null;
+  action: string;
+  previous_status?: string | null;
+  new_status?: string | null;
+  note?: string | null;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface AlertFilterParams {
+  query?: string;
+  status?: AlertStatus | "ALL";
+  severity?: SeverityLevel | "ALL";
+  ruleId?: string;
+  assetId?: string;
+  identityId?: string;
+  mitreTechniqueId?: string;
+  timeRange?: "1h" | "6h" | "24h" | "7d" | "30d" | "all";
+  page?: number;
+  pageSize?: number;
+  sortBy?: "occurred_at" | "created_at" | "severity" | "risk_score";
+  sortDirection?: "asc" | "desc";
+}
+
+export interface AlertTriageUpdateInput {
+  alertId: string;
+  organizationId?: string;
+  status?: AlertStatus;
+  assignedTo?: string | null;
+  note?: string;
+  closedReason?: string;
+}
+
+export interface CreateAlertFromDetectionInput {
+  organizationId: string;
+  detectionResult: DetectionExecutionResult;
+  rule?: DetectionRule;
 }
 
 export interface Incident {

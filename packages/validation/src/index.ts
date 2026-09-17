@@ -35,6 +35,12 @@ export const AlertStatusSchema = z.enum([
   "Escalated",
   "Closed",
   "False Positive",
+  "open",
+  "acknowledged",
+  "in_progress",
+  "escalated" ,
+  "closed",
+  "false_positive",
 ]);
 
 export const AssetTypeSchema = z.enum([
@@ -888,6 +894,125 @@ export type DeleteDetectionRuleInput = z.infer<typeof DeleteDetectionRuleSchema>
 export type ToggleDetectionRuleInput = z.infer<typeof ToggleDetectionRuleSchema>;
 export type EvaluateDetectionRuleInput = z.infer<typeof EvaluateDetectionRuleSchema>;
 export type EvaluateAllDetectionRulesInput = z.infer<typeof EvaluateAllDetectionRulesSchema>;
+
+// ------------------------------------------------------------------------------
+// Phase 16 Alerts & Triage Schemas
+// ------------------------------------------------------------------------------
+
+export const AlertFilterParamsSchema = z.object({
+  query: z.string().max(255).optional(),
+  status: z.union([AlertStatusSchema, z.literal("ALL")]).optional(),
+  severity: z.union([SeverityLevelSchema, z.literal("ALL")]).optional(),
+  ruleId: z.string().max(128).optional(),
+  assetId: z.string().uuid().optional(),
+  identityId: z.string().uuid().optional(),
+  mitreTechniqueId: z.string().max(64).optional(),
+  timeRange: z.enum(["1h", "6h", "24h", "7d", "30d", "all"]).default("24h"),
+  page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(1).max(100).default(25),
+  sortBy: z.enum(["occurred_at", "created_at", "severity", "risk_score"]).default("occurred_at"),
+  sortDirection: z.enum(["asc", "desc"]).default("desc"),
+  organizationId: z.string().uuid().optional(),
+  organization_id: z.string().uuid().optional(),
+});
+
+export const AlertTriageUpdateSchema = z.object({
+  alertId: z.string().uuid("Invalid alert ID format").optional(),
+  alert_id: z.string().uuid("Invalid alert ID format").optional(),
+  organizationId: z.string().uuid("Invalid organization ID format").optional(),
+  organization_id: z.string().uuid("Invalid organization ID format").optional(),
+  status: AlertStatusSchema.optional(),
+  assignedTo: z.string().uuid().nullable().optional(),
+  assigned_to: z.string().uuid().nullable().optional(),
+  note: z.string().max(2000).optional(),
+  closedReason: z.string().max(1000).optional(),
+  closed_reason: z.string().max(1000).optional(),
+}).refine((data) => data.alertId || data.alert_id, {
+  message: "Alert ID is required",
+});
+
+export const AcknowledgeAlertSchema = z.object({
+  alertId: z.string().uuid("Invalid alert ID format").optional(),
+  alert_id: z.string().uuid("Invalid alert ID format").optional(),
+  organizationId: z.string().uuid("Invalid organization ID format").optional(),
+  organization_id: z.string().uuid("Invalid organization ID format").optional(),
+  note: z.string().max(1000).optional(),
+}).refine((data) => data.alertId || data.alert_id, {
+  message: "Alert ID is required",
+});
+
+export const AssignAlertSchema = z.object({
+  alertId: z.string().uuid("Invalid alert ID format").optional(),
+  alert_id: z.string().uuid("Invalid alert ID format").optional(),
+  organizationId: z.string().uuid("Invalid organization ID format").optional(),
+  organization_id: z.string().uuid("Invalid organization ID format").optional(),
+  assignedTo: z.string().uuid("Invalid assignee user ID").nullable(),
+  assigned_to: z.string().uuid("Invalid assignee user ID").nullable().optional(),
+  note: z.string().max(1000).optional(),
+}).refine((data) => data.alertId || data.alert_id, {
+  message: "Alert ID is required",
+});
+
+export const AddAlertNoteSchema = z.object({
+  alertId: z.string().uuid("Invalid alert ID format").optional(),
+  alert_id: z.string().uuid("Invalid alert ID format").optional(),
+  organizationId: z.string().uuid("Invalid organization ID format").optional(),
+  organization_id: z.string().uuid("Invalid organization ID format").optional(),
+  note: z.string().min(1, "Note cannot be empty").max(2000),
+}).refine((data) => data.alertId || data.alert_id, {
+  message: "Alert ID is required",
+});
+
+export const CloseAlertSchema = z.object({
+  alertId: z.string().uuid("Invalid alert ID format").optional(),
+  alert_id: z.string().uuid("Invalid alert ID format").optional(),
+  organizationId: z.string().uuid("Invalid organization ID format").optional(),
+  organization_id: z.string().uuid("Invalid organization ID format").optional(),
+  status: z.enum(["Closed", "False Positive", "closed", "false_positive"]).default("Closed"),
+  reason: z.string().min(3, "Closure rationale must be at least 3 characters").max(1000),
+  note: z.string().max(1000).optional(),
+}).refine((data) => data.alertId || data.alert_id, {
+  message: "Alert ID is required",
+});
+
+export const CreateAlertFromDetectionSchema = z.object({
+  organizationId: z.string().uuid("Invalid organization ID format").optional(),
+  organization_id: z.string().uuid("Invalid organization ID format").optional(),
+  detectionResult: z.object({
+    ruleId: z.string(),
+    ruleName: z.string(),
+    severity: SeverityLevelSchema,
+    matched: z.boolean(),
+    evaluatedAt: z.string(),
+    evaluationWindow: z.object({
+      start: z.string(),
+      end: z.string(),
+    }),
+    matchedEventIds: z.array(z.string()),
+    matchedEvents: z.array(z.any()),
+    primaryAssetId: z.string().nullable().optional(),
+    primaryIdentityId: z.string().nullable().optional(),
+    explanation: z.object({
+      ruleId: z.string(),
+      ruleName: z.string(),
+      matched: z.boolean(),
+      summary: z.string(),
+      details: z.array(z.string()),
+      evaluatedCount: z.number(),
+      matchedCount: z.number(),
+    }),
+    metadata: z.record(z.unknown()).optional(),
+  }),
+});
+
+export type AlertFilterParamsInput = z.infer<typeof AlertFilterParamsSchema>;
+export type AlertTriageUpdateInputType = z.infer<typeof AlertTriageUpdateSchema>;
+export type AcknowledgeAlertInput = z.infer<typeof AcknowledgeAlertSchema>;
+export type AssignAlertInput = z.infer<typeof AssignAlertSchema>;
+export type AddAlertNoteInput = z.infer<typeof AddAlertNoteSchema>;
+export type CloseAlertInput = z.infer<typeof CloseAlertSchema>;
+export type CreateAlertFromDetectionInputType = z.infer<typeof CreateAlertFromDetectionSchema>;
+
 
 
 
