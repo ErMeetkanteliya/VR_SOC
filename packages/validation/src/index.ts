@@ -642,3 +642,97 @@ export type FilterPipelineEventsInput = z.infer<typeof FilterPipelineEventsSchem
 export type ClientEnv = z.infer<typeof ClientEnvSchema>;
 export type ServerEnv = z.infer<typeof ServerEnvSchema>;
 
+// ------------------------------------------------------------------------------
+// Phase 14 SIEM Core Validation Schemas
+// ------------------------------------------------------------------------------
+
+export const SiemTimeRangeSchema = z.enum([
+  "15m",
+  "30m",
+  "1h",
+  "6h",
+  "12h",
+  "24h",
+  "7d",
+  "30d",
+  "custom",
+  "all",
+]);
+
+export const SiemFilterParamsSchema = z.object({
+  query: z.string().max(255).optional(),
+  timeRange: SiemTimeRangeSchema.default("24h").optional(),
+  startTime: z.string().datetime({ offset: true }).or(z.string().datetime()).optional(),
+  endTime: z.string().datetime({ offset: true }).or(z.string().datetime()).optional(),
+  severity: SeverityLevelSchema.or(z.literal("ALL")).default("ALL").optional(),
+  source: z.string().max(64).or(z.literal("ALL")).default("ALL").optional(),
+  sourceType: z.string().max(64).or(z.literal("ALL")).default("ALL").optional(),
+  category: z.string().max(64).or(z.literal("ALL")).default("ALL").optional(),
+  eventType: z.string().max(128).optional(),
+  assetId: z.string().uuid("Invalid asset UUID").optional(),
+  agentId: z.string().uuid("Invalid agent UUID").optional(),
+  identityId: z.string().uuid("Invalid identity UUID").optional(),
+  username: z.string().max(128).optional(),
+  pipelineStatus: z
+    .enum(["Received", "Validated", "Parsed", "Normalized", "Enriched", "Stored", "Failed", "ALL"])
+    .default("ALL")
+    .optional(),
+  page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(1).max(100).default(25),
+  sortBy: z.enum(["occurred_at", "created_at", "severity"]).default("occurred_at"),
+  sortDirection: z.enum(["asc", "desc"]).default("desc"),
+});
+
+export const SiemQuerySchema = z.object({
+  organizationId: z.string().uuid("Invalid organization ID format"),
+  filters: SiemFilterParamsSchema.default({}),
+});
+
+export const SiemCorrelationQuerySchema = z.object({
+  organizationId: z.string().uuid("Invalid organization ID format"),
+  eventId: z.string().uuid("Invalid event ID format"),
+  correlationType: z.enum(["asset", "identity", "agent", "ingestion_batch", "time_window"]).default("asset"),
+  timeWindowMinutes: z.number().int().min(5).max(1440).default(30),
+});
+
+export const SiemTimelineQuerySchema = z.object({
+  organizationId: z.string().uuid("Invalid organization ID format"),
+  assetId: z.string().uuid("Invalid asset UUID").optional(),
+  identityId: z.string().uuid("Invalid identity UUID").optional(),
+  startTime: z.string().optional(),
+  endTime: z.string().optional(),
+  limit: z.number().int().min(5).max(200).default(50),
+});
+
+export const CreateSavedQuerySchema = z.object({
+  organizationId: z.string().uuid("Invalid organization ID format"),
+  name: z.string().min(2, "Name must be at least 2 characters").max(128),
+  description: z.string().max(500).optional(),
+  queryType: z.enum(["events", "logs", "correlated"]).default("events"),
+  filters: SiemFilterParamsSchema.partial().default({}),
+  isPinned: z.boolean().default(false),
+});
+
+export const UpdateSavedQuerySchema = z.object({
+  id: z.string().uuid("Invalid saved query ID"),
+  organizationId: z.string().uuid("Invalid organization ID format"),
+  name: z.string().min(2).max(128).optional(),
+  description: z.string().max(500).optional(),
+  isPinned: z.boolean().optional(),
+  filters: SiemFilterParamsSchema.partial().optional(),
+});
+
+export const DeleteSavedQuerySchema = z.object({
+  id: z.string().uuid("Invalid saved query ID"),
+  organizationId: z.string().uuid("Invalid organization ID format"),
+});
+
+export type SiemFilterParamsInput = z.infer<typeof SiemFilterParamsSchema>;
+export type SiemQueryInput = z.infer<typeof SiemQuerySchema>;
+export type SiemCorrelationQueryInput = z.infer<typeof SiemCorrelationQuerySchema>;
+export type SiemTimelineQueryInput = z.infer<typeof SiemTimelineQuerySchema>;
+export type CreateSavedQueryInput = z.infer<typeof CreateSavedQuerySchema>;
+export type UpdateSavedQueryInput = z.infer<typeof UpdateSavedQuerySchema>;
+export type DeleteSavedQueryInput = z.infer<typeof DeleteSavedQuerySchema>;
+
+

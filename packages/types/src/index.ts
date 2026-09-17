@@ -304,6 +304,9 @@ export interface TelemetryEvent {
   raw_payload?: Record<string, unknown> | null;
   normalized_fields: Record<string, unknown>;
   tags?: string[];
+  pipeline_status?: PipelineStage;
+  ingestion_id?: string | null;
+  source_host?: string | null;
   created_at: string;
   asset?: Asset;
   agent?: Agent;
@@ -323,6 +326,10 @@ export interface LogRecord {
   raw_log?: string | null;
   parse_status: LogParseStatus;
   parser_name?: string | null;
+  pipeline_status?: PipelineStage;
+  ingestion_id?: string | null;
+  source?: string | null;
+  source_type?: string | null;
   metadata?: Record<string, unknown>;
   created_at: string;
   event?: TelemetryEvent;
@@ -618,4 +625,113 @@ export interface PipelineConfig {
   supportedSourceTypes: readonly string[];
   supportedCategories: readonly string[];
 }
+
+// ------------------------------------------------------------------------------
+// Phase 14 SIEM Core Entities & Query Contracts
+// ------------------------------------------------------------------------------
+
+export type SiemTimeRange =
+  | "15m"
+  | "30m"
+  | "1h"
+  | "6h"
+  | "12h"
+  | "24h"
+  | "7d"
+  | "30d"
+  | "custom"
+  | "all";
+
+export interface SiemFilterParams {
+  query?: string;
+  timeRange?: SiemTimeRange;
+  startTime?: string;
+  endTime?: string;
+  severity?: SeverityLevel | "ALL";
+  source?: string | "ALL";
+  sourceType?: string | "ALL";
+  category?: string | "ALL";
+  eventType?: string;
+  assetId?: string;
+  agentId?: string;
+  identityId?: string;
+  username?: string;
+  pipelineStatus?: PipelineStage | "ALL";
+  page?: number;
+  pageSize?: number;
+  sortBy?: "occurred_at" | "created_at" | "severity";
+  sortDirection?: "asc" | "desc";
+}
+
+export interface SiemQueryResult<T> {
+  items: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasMore: boolean;
+  durationMs: number;
+  appliedFilters: SiemFilterParams;
+}
+
+export type SiemCorrelationType =
+  | "asset"
+  | "identity"
+  | "agent"
+  | "ingestion_batch"
+  | "time_window";
+
+export interface SiemCorrelatedGroup {
+  correlationType: SiemCorrelationType;
+  correlationKey: string;
+  label: string;
+  reason: string;
+  events: TelemetryEvent[];
+  count: number;
+  timeSpan: {
+    start: string;
+    end: string;
+  };
+}
+
+export interface SiemTimelineItem {
+  id: string;
+  occurredAt: string;
+  createdAt: string;
+  type: "event" | "log";
+  title: string;
+  source: string;
+  sourceType?: string;
+  severity: SeverityLevel;
+  category: string;
+  summary: string;
+  assetHostname?: string;
+  assetId?: string;
+  username?: string;
+  details: Record<string, unknown>;
+  rawEvent?: TelemetryEvent;
+  rawLog?: LogRecord;
+}
+
+export interface SavedQuery {
+  id: string;
+  organization_id: string;
+  user_id?: string | null;
+  name: string;
+  description?: string | null;
+  query_type: "events" | "logs" | "correlated";
+  filters: Partial<SiemFilterParams>;
+  is_pinned: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateSavedQueryInput {
+  name: string;
+  description?: string;
+  queryType?: "events" | "logs" | "correlated";
+  filters: Partial<SiemFilterParams>;
+  isPinned?: boolean;
+}
+
 
