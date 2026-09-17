@@ -502,8 +502,89 @@ export const FilterLogsSchema = z.object({
   facility: z.string().optional(),
   serviceName: z.string().optional(),
   sourceHost: z.string().optional(),
+  parseStatus: z.string().optional(),
+  source: z.string().optional(),
+  sourceType: z.string().optional(),
+  pipelineStatus: z.string().optional(),
   page: z.number().int().min(1).default(1),
-  pageSize: z.number().int().min(1).max(100).default(20),
+  pageSize: z.number().int().min(1).max(100).default(25),
+});
+
+// Phase 13: Log / Event Pipeline Schemas
+export const PipelineStageSchema = z.enum([
+  "Received",
+  "Validated",
+  "Parsed",
+  "Normalized",
+  "Enriched",
+  "Stored",
+  "Failed",
+]);
+
+export const PipelineIngestionSchema = z.object({
+  source: z.string().min(1, "Source is required"),
+  sourceType: z.string().min(1, "Source type is required"),
+  category: z.string().min(1, "Category is required"),
+  eventType: z.string().min(1, "Event type is required"),
+  severity: SeverityLevelSchema,
+  logLevel: z.enum(["DEBUG", "INFO", "NOTICE", "WARN", "ERROR", "CRIT", "ALERT", "EMERG"]).optional(),
+  occurredAt: z.string().datetime({ offset: true }).optional(),
+  message: z.string().min(1, "Message is required"),
+  rawLog: z.string().optional(),
+  normalizedFields: z.record(z.unknown()).optional().default({}),
+  tags: z.array(z.string()).optional(),
+  organizationId: z.string().uuid("Valid organization ID required"),
+  assetId: z.string().uuid().optional().nullable(),
+  agentId: z.string().uuid().optional().nullable(),
+  identityId: z.string().uuid().optional().nullable(),
+  sourceHost: z.string().optional(),
+  ingestionId: z.string().optional(),
+  process: z.object({
+    name: z.string(),
+    executablePath: z.string(),
+    commandLine: z.string().optional(),
+    sha256: z.string().optional(),
+    integrityLevel: z.enum(["Low", "Medium", "High", "System"]).optional(),
+  }).optional(),
+  file: z.object({
+    path: z.string(),
+    name: z.string(),
+    extension: z.string().optional(),
+    sizeBytes: z.number().optional(),
+    sha256: z.string().optional(),
+    isExecutable: z.boolean().optional(),
+    isHidden: z.boolean().optional(),
+  }).optional(),
+  network: z.object({
+    srcIp: z.string(),
+    dstIp: z.string(),
+    srcPort: z.number().int().min(0).max(65535),
+    dstPort: z.number().int().min(0).max(65535),
+    protocol: z.enum(["TCP", "UDP", "ICMP", "DNS", "HTTP", "HTTPS", "TLS"]).optional(),
+    direction: z.enum(["Inbound", "Outbound", "Internal", "Lateral"]).optional(),
+    status: z.enum(["Established", "Closed", "Blocked", "Listening", "SYN_SENT", "Time_Wait"]).optional(),
+  }).optional(),
+});
+
+export const PipelineBatchIngestionSchema = z.object({
+  payloads: z.array(PipelineIngestionSchema).min(1).max(100),
+});
+
+export const FilterPipelineEventsSchema = z.object({
+  search: z.string().optional(),
+  category: z.string().optional(),
+  source: z.string().optional(),
+  sourceType: z.string().optional(),
+  severity: z.string().optional(),
+  pipelineStatus: z.string().optional(),
+  assetId: z.string().optional(),
+  agentId: z.string().optional(),
+  identityId: z.string().optional(),
+  sourceHost: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(1).max(100).default(25),
 });
 
 // Environment variable validation schemas
@@ -555,6 +636,9 @@ export type FilterSimulationScenariosInput = z.infer<typeof FilterSimulationScen
 export type FilterSimulationRunsInput = z.infer<typeof FilterSimulationRunsSchema>;
 export type FilterTelemetryEventsInput = z.infer<typeof FilterTelemetryEventsSchema>;
 export type FilterLogsInput = z.infer<typeof FilterLogsSchema>;
+export type PipelineIngestionInput = z.infer<typeof PipelineIngestionSchema>;
+export type PipelineBatchIngestionInput = z.infer<typeof PipelineBatchIngestionSchema>;
+export type FilterPipelineEventsInput = z.infer<typeof FilterPipelineEventsSchema>;
 export type ClientEnv = z.infer<typeof ClientEnvSchema>;
 export type ServerEnv = z.infer<typeof ServerEnvSchema>;
 

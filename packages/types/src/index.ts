@@ -570,3 +570,52 @@ export interface HealthCheckResponse {
   };
 }
 
+// ------------------------------------------------------------------------------
+// Phase 13 Log / Event Pipeline
+// ------------------------------------------------------------------------------
+
+export type PipelineStage = "Received" | "Validated" | "Parsed" | "Normalized" | "Enriched" | "Stored" | "Failed";
+
+export interface PipelineResult {
+  success: boolean;
+  stage: PipelineStage;
+  eventId?: string;
+  logId?: string;
+  ingestionId: string;
+  processingDurationMs: number;
+  enrichments?: string[];
+  error?: string;
+  failedStage?: PipelineStage;
+}
+
+export interface PipelineBatchResult {
+  processed: number;
+  succeeded: number;
+  failed: number;
+  duplicatesSkipped: number;
+  results: PipelineResult[];
+  totalDurationMs: number;
+}
+
+export interface IngestionMetrics {
+  totalProcessed: number;
+  totalSucceeded: number;
+  totalFailed: number;
+  totalDuplicatesSkipped: number;
+  avgProcessingDurationMs: number;
+  sourceDistribution: Record<string, number>;
+  severityDistribution: Record<string, number>;
+  categoryDistribution: Record<string, number>;
+  pipelineStatusDistribution: Record<string, number>;
+  lastProcessedAt?: string;
+}
+
+export interface PipelineConfig {
+  enableDeduplication: boolean;
+  enableEnrichment: boolean;
+  maxBatchSize: number;
+  supportedSources: readonly string[];
+  supportedSourceTypes: readonly string[];
+  supportedCategories: readonly string[];
+}
+
