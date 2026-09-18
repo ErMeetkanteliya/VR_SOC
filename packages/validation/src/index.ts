@@ -1666,6 +1666,79 @@ export type IocRelationshipValidationInput = z.infer<typeof IocRelationshipSchem
 export type CreateIocRelationshipValidationInput = z.infer<typeof CreateIocRelationshipInputSchema>;
 export type IocFilterValidationInput = z.infer<typeof IocFilterSchema>;
 
+// ------------------------------------------------------------------------------
+// Phase 21 Threat Hunting & Investigation Schemas
+// ------------------------------------------------------------------------------
+
+export const HuntTypeSchema = z.enum([
+  "all",
+  "ioc",
+  "ip",
+  "hash",
+  "user",
+  "host",
+  "process",
+  "registry",
+  "dns",
+]);
+
+export const HuntSessionStatusSchema = z.enum([
+  "active",
+  "completed",
+  "saved",
+  "archived",
+]);
+
+export const HuntEvidenceTargetTypeSchema = z.enum([
+  "event",
+  "alert",
+  "ioc",
+  "process",
+  "socket",
+  "registry",
+]);
+
+export const HuntQueryInputSchema = z.object({
+  query: z.string().min(1, "Query is required").max(500),
+  hunt_type: HuntTypeSchema.optional().default("all"),
+  time_range: z.enum(["1h", "24h", "7d", "30d", "all"]).optional().default("24h"),
+  entity_value: z.string().max(255).optional(),
+  host_name: z.string().max(128).optional(),
+  user_name: z.string().max(128).optional(),
+  limit: z.number().int().min(1).max(200).optional().default(50),
+});
+
+export const CreateHuntSessionInputSchema = z.object({
+  title: z.string().min(1, "Title is required").max(255),
+  hypothesis: z.string().max(2000).optional(),
+  hunt_type: HuntTypeSchema.optional().default("all"),
+  query: z.string().min(1, "Query is required").max(500),
+  status: HuntSessionStatusSchema.optional().default("active"),
+  metadata: z.record(z.unknown()).optional().default({}),
+});
+
+export const CreateHuntEvidenceInputSchema = z.object({
+  hunt_id: z.string().uuid().optional(),
+  target_type: HuntEvidenceTargetTypeSchema,
+  target_id: z.string().min(1, "Target ID is required").max(128),
+  summary: z.string().min(1, "Summary is required").max(500),
+  description: z.string().max(2000).optional(),
+  confidence: z.number().int().min(0).max(100).optional().default(85),
+  metadata: z.record(z.unknown()).optional().default({}),
+});
+
+export const CreateHuntNoteInputSchema = z.object({
+  hunt_id: z.string().uuid().optional(),
+  content: z.string().min(1, "Content is required").max(5000),
+  tags: z.array(z.string().max(64)).optional().default([]),
+});
+
+export type HuntQueryValidationInput = z.infer<typeof HuntQueryInputSchema>;
+export type CreateHuntSessionValidationInput = z.infer<typeof CreateHuntSessionInputSchema>;
+export type CreateHuntEvidenceValidationInput = z.infer<typeof CreateHuntEvidenceInputSchema>;
+export type CreateHuntNoteValidationInput = z.infer<typeof CreateHuntNoteInputSchema>;
+
+
 
 
 

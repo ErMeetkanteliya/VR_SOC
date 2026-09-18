@@ -43,6 +43,12 @@ export type Permission =
   | "threat_intel:update"
   | "threat_intel:delete"
   | "threat_intel:relate"
+  // Threat Hunting & Investigation
+  | "threat_hunting:read"
+  | "threat_hunting:execute"
+  | "threat_hunting:save"
+  | "threat_hunting:evidence"
+  | "threat_hunting:note"
   // Alerts & Incidents
   | "alerts:read"
   | "alerts:triage"
@@ -1657,6 +1663,175 @@ export interface CreateIocRelationshipInput {
   relationship_type?: IocRelationshipType;
   context?: Record<string, unknown>;
 }
+
+// ==========================================
+// PHASE 21: THREAT HUNTING & INVESTIGATION
+// ==========================================
+
+export type HuntType =
+  | "all"
+  | "ioc"
+  | "ip"
+  | "hash"
+  | "user"
+  | "host"
+  | "process"
+  | "registry"
+  | "dns";
+
+export type HuntSessionStatus = "active" | "completed" | "saved" | "archived";
+
+export type HuntEvidenceTargetType =
+  | "event"
+  | "alert"
+  | "ioc"
+  | "process"
+  | "socket"
+  | "registry";
+
+export interface HuntSession {
+  id: string;
+  organization_id: string;
+  title: string;
+  hypothesis?: string;
+  hunt_type: HuntType;
+  query: string;
+  status: HuntSessionStatus;
+  analyst_id?: string;
+  analyst_name: string;
+  findings_count: number;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface HuntEvidence {
+  id: string;
+  organization_id: string;
+  hunt_id?: string;
+  target_type: HuntEvidenceTargetType;
+  target_id: string;
+  summary: string;
+  description?: string;
+  confidence: number;
+  metadata?: Record<string, unknown>;
+  added_by: string;
+  created_at: string;
+}
+
+export interface HuntNote {
+  id: string;
+  organization_id: string;
+  hunt_id?: string;
+  author_id?: string;
+  author_name: string;
+  content: string;
+  tags?: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface HuntTimelineItem {
+  id: string;
+  occurred_at: string;
+  source_type: "event" | "process" | "socket" | "registry" | "dns" | "alert" | "ioc";
+  title: string;
+  description: string;
+  severity?: "critical" | "high" | "medium" | "low" | "informational";
+  entity_type: string;
+  entity_value: string;
+  host_name?: string;
+  user_name?: string;
+  raw_data?: Record<string, unknown>;
+}
+
+export interface HuntAttackStep {
+  step_number: number;
+  phase: string;
+  tactic_id?: string;
+  technique_id?: string;
+  source_entity: string;
+  activity: string;
+  destination_entity: string;
+  occurred_at: string;
+  reason: string;
+  confidence: number;
+}
+
+export interface HuntGraphNode {
+  id: string;
+  type: "ioc" | "host" | "user" | "process" | "alert" | "network" | "registry";
+  label: string;
+  sublabel?: string;
+  severity?: string;
+}
+
+export interface HuntGraphEdge {
+  id: string;
+  source: string;
+  target: string;
+  label: string;
+  timestamp?: string;
+}
+
+export interface HuntInvestigationGraph {
+  nodes: HuntGraphNode[];
+  edges: HuntGraphEdge[];
+}
+
+export interface HuntQueryInput {
+  query: string;
+  hunt_type?: HuntType;
+  time_range?: "1h" | "24h" | "7d" | "30d" | "all";
+  entity_value?: string;
+  host_name?: string;
+  user_name?: string;
+  limit?: number;
+}
+
+export interface HuntQueryResult {
+  query: string;
+  hunt_type: HuntType;
+  total_matches: number;
+  related_alerts: Alert[];
+  related_iocs: ThreatIndicator[];
+  timeline: HuntTimelineItem[];
+  attack_path: HuntAttackStep[];
+  graph: HuntInvestigationGraph;
+  matched_events_count: number;
+  matched_processes_count: number;
+  matched_sockets_count: number;
+  matched_registry_count: number;
+  matched_alerts_count: number;
+  matched_iocs_count: number;
+  summary: string;
+}
+
+export interface CreateHuntSessionInput {
+  title: string;
+  hypothesis?: string;
+  hunt_type?: HuntType;
+  query: string;
+  status?: HuntSessionStatus;
+  metadata?: Record<string, unknown>;
+}
+
+export interface CreateHuntEvidenceInput {
+  hunt_id?: string;
+  target_type: HuntEvidenceTargetType;
+  target_id: string;
+  summary: string;
+  description?: string;
+  confidence?: number;
+  metadata?: Record<string, unknown>;
+}
+
+export interface CreateHuntNoteInput {
+  hunt_id?: string;
+  content: string;
+  tags?: string[];
+}
+
 
 
 

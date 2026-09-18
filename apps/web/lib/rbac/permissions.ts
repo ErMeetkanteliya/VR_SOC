@@ -32,6 +32,12 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     "threat_intel:update",
     "threat_intel:delete",
     "threat_intel:relate",
+    // Threat Hunting & Investigation
+    "threat_hunting:read",
+    "threat_hunting:execute",
+    "threat_hunting:save",
+    "threat_hunting:evidence",
+    "threat_hunting:note",
     // Alerts & Incidents
     "alerts:read",
     "alerts:triage",
@@ -93,6 +99,12 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     "threat_intel:create",
     "threat_intel:update",
     "threat_intel:relate",
+    // Threat Hunting & Investigation
+    "threat_hunting:read",
+    "threat_hunting:execute",
+    "threat_hunting:save",
+    "threat_hunting:evidence",
+    "threat_hunting:note",
     // Alerts & Incidents
     "alerts:read",
     "alerts:triage",
@@ -139,6 +151,9 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     "mitre:read",
     // Threat Intelligence & IOCs
     "threat_intel:read",
+    // Threat Hunting & Investigation
+    "threat_hunting:read",
+    "threat_hunting:execute",
     // Alerts & Incidents
     "alerts:read",
     "alerts:triage",
@@ -176,6 +191,12 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     "threat_intel:update",
     "threat_intel:delete",
     "threat_intel:relate",
+    // Threat Hunting & Investigation
+    "threat_hunting:read",
+    "threat_hunting:execute",
+    "threat_hunting:save",
+    "threat_hunting:evidence",
+    "threat_hunting:note",
     // Alerts & Incidents
     "alerts:read",
     "alerts:triage",
@@ -222,6 +243,12 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     "threat_intel:update",
     "threat_intel:delete",
     "threat_intel:relate",
+    // Threat Hunting & Investigation
+    "threat_hunting:read",
+    "threat_hunting:execute",
+    "threat_hunting:save",
+    "threat_hunting:evidence",
+    "threat_hunting:note",
     // Alerts & Incidents
     "alerts:read",
     "alerts:triage",
@@ -276,6 +303,12 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     "threat_intel:update",
     "threat_intel:delete",
     "threat_intel:relate",
+    // Threat Hunting & Investigation
+    "threat_hunting:read",
+    "threat_hunting:execute",
+    "threat_hunting:save",
+    "threat_hunting:evidence",
+    "threat_hunting:note",
     // Alerts & Incidents
     "alerts:read",
     "alerts:triage",
@@ -313,6 +346,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     "mitre:read",
     // Threat Intelligence & IOCs
     "threat_intel:read",
+    // Threat Hunting & Investigation
+    "threat_hunting:read",
     // Alerts & Incidents
     "alerts:read",
     // Incidents & Cases
