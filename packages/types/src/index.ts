@@ -958,5 +958,215 @@ export interface DetectionExecutionResult {
   metadata?: Record<string, unknown>;
 }
 
+// ------------------------------------------------------------------------------
+// Phase 17 EDR Simulation & Endpoint Investigation Types
+// ------------------------------------------------------------------------------
 
+export type RegistryHive = "HKLM" | "HKCU" | "HKCR" | "HKU" | "HKCC" | "HKPD";
+export type RegistryAction = "Created" | "Modified" | "Deleted" | "Queried" | "Renamed" | "SetSecurity";
 
+export interface RegistryEvent {
+  id: string;
+  organization_id: string;
+  asset_id: string;
+  agent_id?: string | null;
+  process_id?: string | null;
+  event_id?: string | null;
+  hive: RegistryHive;
+  key_path: string;
+  value_name?: string | null;
+  value_data?: string | null;
+  value_type?: string;
+  action: RegistryAction;
+  occurred_at: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+}
+
+export type ServiceStartType = "Auto" | "Manual" | "Disabled" | "Boot" | "System" | "Delayed";
+export type ServiceStatus = "Running" | "Stopped" | "Paused" | "StartPending" | "StopPending" | "Installed" | "Deleted";
+export type ServiceAction = "Installed" | "Started" | "Stopped" | "Modified" | "Deleted" | "Configured";
+
+export interface EndpointServiceEvent {
+  id: string;
+  organization_id: string;
+  asset_id: string;
+  agent_id?: string | null;
+  process_id?: string | null;
+  service_name: string;
+  display_name?: string | null;
+  executable_path?: string | null;
+  start_type: ServiceStartType;
+  status: ServiceStatus;
+  action: ServiceAction;
+  account_name?: string | null;
+  occurred_at: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+}
+
+export type ScheduledTaskAction = "Created" | "Modified" | "Deleted" | "Triggered" | "Enabled" | "Disabled" | "Executed";
+export type ScheduledTaskTrigger = "AtLogon" | "AtStartup" | "Daily" | "Weekly" | "Interval" | "OnIdle" | "OnEvent" | "Custom";
+
+export interface ScheduledTaskEvent {
+  id: string;
+  organization_id: string;
+  asset_id: string;
+  agent_id?: string | null;
+  process_id?: string | null;
+  task_name: string;
+  task_path?: string;
+  action: ScheduledTaskAction;
+  command?: string | null;
+  arguments?: string | null;
+  run_as_user?: string | null;
+  trigger_type: ScheduledTaskTrigger;
+  occurred_at: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+}
+
+export type StartupItemLocation = "RegistryRun" | "StartupFolder" | "TaskScheduler" | "Service" | "Winlogon" | "BootExecute";
+export type StartupItemAction = "Added" | "Modified" | "Removed" | "Enabled" | "Disabled";
+
+export interface StartupItem {
+  id: string;
+  organization_id: string;
+  asset_id: string;
+  agent_id?: string | null;
+  name: string;
+  location_type: StartupItemLocation;
+  location_path: string;
+  command: string;
+  user_context?: string | null;
+  action: StartupItemAction;
+  occurred_at: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+}
+
+export type UsbDeviceAction = "Connected" | "Disconnected" | "Mounted" | "Unmounted" | "FileRead" | "FileWritten" | "Blocked";
+
+export interface UsbDeviceEvent {
+  id: string;
+  organization_id: string;
+  asset_id: string;
+  agent_id?: string | null;
+  vendor_id?: string | null;
+  product_id?: string | null;
+  device_name: string;
+  device_class?: string;
+  serial_number?: string | null;
+  drive_letter?: string | null;
+  action: UsbDeviceAction;
+  occurred_at: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface EdrProcessTreeNode {
+  id: string;
+  pid: number;
+  ppid?: number | null;
+  process_guid?: string | null;
+  parent_process_guid?: string | null;
+  name: string;
+  executable_path: string;
+  command_line?: string | null;
+  username?: string | null;
+  sha256?: string | null;
+  started_at: string;
+  ended_at?: string | null;
+  integrity_level?: "Low" | "Medium" | "High" | "System" | null;
+  is_suspicious?: boolean;
+  suspicious_reasons?: string[];
+  event_count?: number;
+  children: EdrProcessTreeNode[];
+}
+
+export type EdrActivityCategory =
+  | "all"
+  | "processes"
+  | "files"
+  | "network"
+  | "registry"
+  | "services"
+  | "tasks"
+  | "startup"
+  | "usb"
+  | "timeline"
+  | "alerts";
+
+export interface EdrFilterParams {
+  assetId?: string;
+  agentId?: string;
+  timeRange?: SiemTimeRange;
+  startTime?: string;
+  endTime?: string;
+  category?: EdrActivityCategory;
+  query?: string;
+  page?: number;
+  pageSize?: number;
+  minSeverity?: SeverityLevel;
+}
+
+export interface EndpointTimelineItem {
+  id: string;
+  occurredAt: string;
+  category: "process" | "file" | "network" | "registry" | "service" | "task" | "startup" | "usb" | "alert" | "event";
+  action: string;
+  title: string;
+  summary: string;
+  severity: SeverityLevel;
+  source: string;
+  details: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+}
+
+export interface EndpointInvestigationSummary {
+  totalProcesses: number;
+  suspiciousProcesses: number;
+  fileModifications: number;
+  networkConnections: number;
+  registryChanges: number;
+  servicesInstalled: number;
+  scheduledTasks: number;
+  startupItems: number;
+  usbEvents: number;
+  activeAlerts: number;
+}
+
+export interface EndpointInvestigationPackage {
+  asset: Asset;
+  agent?: Agent | null;
+  summary: EndpointInvestigationSummary;
+  processes: ProcessRecord[];
+  processTree: EdrProcessTreeNode[];
+  files: FileRecord[];
+  networkConnections: NetworkConnectionRecord[];
+  registryEvents: RegistryEvent[];
+  services: EndpointServiceEvent[];
+  scheduledTasks: ScheduledTaskEvent[];
+  startupItems: StartupItem[];
+  usbEvents: UsbDeviceEvent[];
+  timeline: EndpointTimelineItem[];
+  relatedAlerts: Alert[];
+  relatedEvents: TelemetryEvent[];
+}
+
+export type EdrSimulationScenarioType =
+  | "process_masquerading"
+  | "registry_run_persistence"
+  | "suspicious_file_drop"
+  | "c2_network_beaconing"
+  | "malicious_service_install"
+  | "scheduled_task_creation"
+  | "startup_folder_hijack"
+  | "unauthorized_usb_insertion"
+  | "multi_stage_endpoint_attack";
+
+export interface SimulateEdrScenarioInput {
+  organizationId: string;
+  assetId: string;
+  scenarioType: EdrSimulationScenarioType;
+}

@@ -107,6 +107,42 @@ export const NetworkConnectionStatusSchema = z.enum([
   "Time_Wait",
 ]);
 
+// Phase 17 EDR Enums
+export const RegistryHiveSchema = z.enum(["HKLM", "HKCU", "HKCR", "HKU", "HKCC", "HKPD"]);
+export const RegistryActionSchema = z.enum(["Created", "Modified", "Deleted", "Queried", "Renamed", "SetSecurity"]);
+export const ServiceStartTypeSchema = z.enum(["Auto", "Manual", "Disabled", "Boot", "System", "Delayed"]);
+export const ServiceStatusSchema = z.enum(["Running", "Stopped", "Paused", "StartPending", "StopPending", "Installed", "Deleted"]);
+export const ServiceActionSchema = z.enum(["Installed", "Started", "Stopped", "Modified", "Deleted", "Configured"]);
+export const ScheduledTaskActionSchema = z.enum(["Created", "Modified", "Deleted", "Triggered", "Enabled", "Disabled", "Executed"]);
+export const ScheduledTaskTriggerSchema = z.enum(["AtLogon", "AtStartup", "Daily", "Weekly", "Interval", "OnIdle", "OnEvent", "Custom"]);
+export const StartupItemLocationSchema = z.enum(["RegistryRun", "StartupFolder", "TaskScheduler", "Service", "Winlogon", "BootExecute"]);
+export const StartupItemActionSchema = z.enum(["Added", "Modified", "Removed", "Enabled", "Disabled"]);
+export const UsbDeviceActionSchema = z.enum(["Connected", "Disconnected", "Mounted", "Unmounted", "FileRead", "FileWritten", "Blocked"]);
+export const EdrActivityCategorySchema = z.enum([
+  "all",
+  "processes",
+  "files",
+  "network",
+  "registry",
+  "services",
+  "tasks",
+  "startup",
+  "usb",
+  "timeline",
+  "alerts",
+]);
+export const EdrSimulationScenarioTypeSchema = z.enum([
+  "process_masquerading",
+  "registry_run_persistence",
+  "suspicious_file_drop",
+  "c2_network_beaconing",
+  "malicious_service_install",
+  "scheduled_task_creation",
+  "startup_folder_hijack",
+  "unauthorized_usb_insertion",
+  "multi_stage_endpoint_attack",
+]);
+
 // Auth Schemas
 export const LoginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -542,7 +578,7 @@ export const PipelineIngestionSchema = z.object({
   occurredAt: z.string().datetime({ offset: true }).optional(),
   message: z.string().min(1, "Message is required"),
   rawLog: z.string().optional(),
-  normalizedFields: z.record(z.unknown()).optional().default({}),
+  normalizedFields: z.record(z.unknown()).optional(),
   tags: z.array(z.string()).optional(),
   organizationId: z.string().uuid("Valid organization ID required"),
   assetId: z.string().uuid().optional().nullable(),
@@ -574,6 +610,49 @@ export const PipelineIngestionSchema = z.object({
     protocol: z.enum(["TCP", "UDP", "ICMP", "DNS", "HTTP", "HTTPS", "TLS"]).optional(),
     direction: z.enum(["Inbound", "Outbound", "Internal", "Lateral"]).optional(),
     status: z.enum(["Established", "Closed", "Blocked", "Listening", "SYN_SENT", "Time_Wait"]).optional(),
+  }).optional(),
+  registry: z.object({
+    hive: RegistryHiveSchema,
+    keyPath: z.string(),
+    valueName: z.string().optional(),
+    valueData: z.string().optional(),
+    valueType: z.string().optional(),
+    action: RegistryActionSchema,
+  }).optional(),
+  service: z.object({
+    serviceName: z.string(),
+    displayName: z.string().optional(),
+    executablePath: z.string().optional(),
+    startType: ServiceStartTypeSchema.optional(),
+    status: ServiceStatusSchema.optional(),
+    action: ServiceActionSchema.optional(),
+    accountName: z.string().optional(),
+  }).optional(),
+  scheduledTask: z.object({
+    taskName: z.string(),
+    taskPath: z.string().optional(),
+    action: ScheduledTaskActionSchema.optional(),
+    command: z.string().optional(),
+    arguments: z.string().optional(),
+    runAsUser: z.string().optional(),
+    triggerType: ScheduledTaskTriggerSchema.optional(),
+  }).optional(),
+  startupItem: z.object({
+    name: z.string(),
+    locationType: StartupItemLocationSchema,
+    locationPath: z.string(),
+    command: z.string(),
+    userContext: z.string().optional(),
+    action: StartupItemActionSchema.optional(),
+  }).optional(),
+  usb: z.object({
+    vendorId: z.string().optional(),
+    productId: z.string().optional(),
+    deviceName: z.string(),
+    deviceClass: z.string().optional(),
+    serialNumber: z.string().optional(),
+    driveLetter: z.string().optional(),
+    action: UsbDeviceActionSchema.optional(),
   }).optional(),
 });
 
@@ -1013,6 +1092,129 @@ export type AddAlertNoteInput = z.infer<typeof AddAlertNoteSchema>;
 export type CloseAlertInput = z.infer<typeof CloseAlertSchema>;
 export type CreateAlertFromDetectionInputType = z.infer<typeof CreateAlertFromDetectionSchema>;
 
+// ------------------------------------------------------------------------------
+// Phase 17 EDR Validation Schemas
+// ------------------------------------------------------------------------------
 
+export const RegistryEventSchema = z.object({
+  id: z.string().uuid().optional(),
+  organization_id: z.string().uuid("Invalid organization ID format"),
+  asset_id: z.string().uuid("Invalid asset ID format"),
+  agent_id: z.string().uuid().nullable().optional(),
+  process_id: z.string().uuid().nullable().optional(),
+  event_id: z.string().uuid().nullable().optional(),
+  hive: RegistryHiveSchema,
+  key_path: z.string().min(1, "Key path is required"),
+  value_name: z.string().nullable().optional(),
+  value_data: z.string().nullable().optional(),
+  value_type: z.string().default("REG_SZ").optional(),
+  action: RegistryActionSchema,
+  occurred_at: z.string().datetime({ offset: true }).or(z.string()),
+  metadata: z.record(z.unknown()).default({}),
+});
 
+export const EndpointServiceEventSchema = z.object({
+  id: z.string().uuid().optional(),
+  organization_id: z.string().uuid("Invalid organization ID format"),
+  asset_id: z.string().uuid("Invalid asset ID format"),
+  agent_id: z.string().uuid().nullable().optional(),
+  process_id: z.string().uuid().nullable().optional(),
+  service_name: z.string().min(1, "Service name is required"),
+  display_name: z.string().nullable().optional(),
+  executable_path: z.string().nullable().optional(),
+  start_type: ServiceStartTypeSchema.default("Auto"),
+  status: ServiceStatusSchema.default("Running"),
+  action: ServiceActionSchema.default("Modified"),
+  account_name: z.string().nullable().optional(),
+  occurred_at: z.string().datetime({ offset: true }).or(z.string()),
+  metadata: z.record(z.unknown()).default({}),
+});
+
+export const ScheduledTaskEventSchema = z.object({
+  id: z.string().uuid().optional(),
+  organization_id: z.string().uuid("Invalid organization ID format"),
+  asset_id: z.string().uuid("Invalid asset ID format"),
+  agent_id: z.string().uuid().nullable().optional(),
+  process_id: z.string().uuid().nullable().optional(),
+  task_name: z.string().min(1, "Task name is required"),
+  task_path: z.string().default("\\").optional(),
+  action: ScheduledTaskActionSchema.default("Created"),
+  command: z.string().nullable().optional(),
+  arguments: z.string().nullable().optional(),
+  run_as_user: z.string().nullable().optional(),
+  trigger_type: ScheduledTaskTriggerSchema.default("Daily"),
+  occurred_at: z.string().datetime({ offset: true }).or(z.string()),
+  metadata: z.record(z.unknown()).default({}),
+});
+
+export const StartupItemSchema = z.object({
+  id: z.string().uuid().optional(),
+  organization_id: z.string().uuid("Invalid organization ID format"),
+  asset_id: z.string().uuid("Invalid asset ID format"),
+  agent_id: z.string().uuid().nullable().optional(),
+  name: z.string().min(1, "Name is required"),
+  location_type: StartupItemLocationSchema,
+  location_path: z.string().min(1, "Location path is required"),
+  command: z.string().min(1, "Command is required"),
+  user_context: z.string().nullable().optional(),
+  action: StartupItemActionSchema.default("Added"),
+  occurred_at: z.string().datetime({ offset: true }).or(z.string()),
+  metadata: z.record(z.unknown()).default({}),
+});
+
+export const UsbDeviceEventSchema = z.object({
+  id: z.string().uuid().optional(),
+  organization_id: z.string().uuid("Invalid organization ID format"),
+  asset_id: z.string().uuid("Invalid asset ID format"),
+  agent_id: z.string().uuid().nullable().optional(),
+  vendor_id: z.string().nullable().optional(),
+  product_id: z.string().nullable().optional(),
+  device_name: z.string().min(1, "Device name is required"),
+  device_class: z.string().default("Mass Storage").optional(),
+  serial_number: z.string().nullable().optional(),
+  drive_letter: z.string().nullable().optional(),
+  action: UsbDeviceActionSchema.default("Connected"),
+  occurred_at: z.string().datetime({ offset: true }).or(z.string()),
+  metadata: z.record(z.unknown()).default({}),
+});
+
+export const EdrFilterParamsSchema = z.object({
+  assetId: z.string().uuid().optional(),
+  agentId: z.string().uuid().optional(),
+  timeRange: z.enum(["15m", "30m", "1h", "6h", "12h", "24h", "7d", "30d", "custom", "all"]).optional(),
+  startTime: z.string().datetime({ offset: true }).or(z.string()).optional(),
+  endTime: z.string().datetime({ offset: true }).or(z.string()).optional(),
+  category: EdrActivityCategorySchema.default("all").optional(),
+  query: z.string().max(256).optional(),
+  page: z.number().int().min(1).default(1).optional(),
+  pageSize: z.number().int().min(1).max(200).default(50).optional(),
+  minSeverity: SeverityLevelSchema.optional(),
+});
+
+export const SimulateEdrScenarioSchema = z.object({
+  organizationId: z.string().uuid("Invalid organization ID format").optional(),
+  assetId: z.string().uuid("Invalid asset ID format"),
+  scenarioType: EdrSimulationScenarioTypeSchema,
+});
+
+export const GetProcessTreeSchema = z.object({
+  organizationId: z.string().uuid("Invalid organization ID format").optional(),
+  assetId: z.string().uuid("Invalid asset ID format"),
+});
+
+export const GetEndpointInvestigationSchema = z.object({
+  organizationId: z.string().uuid("Invalid organization ID format").optional(),
+  assetId: z.string().uuid("Invalid asset ID format"),
+  filters: EdrFilterParamsSchema.optional(),
+});
+
+export type RegistryEventInput = z.infer<typeof RegistryEventSchema>;
+export type EndpointServiceEventInput = z.infer<typeof EndpointServiceEventSchema>;
+export type ScheduledTaskEventInput = z.infer<typeof ScheduledTaskEventSchema>;
+export type StartupItemInput = z.infer<typeof StartupItemSchema>;
+export type UsbDeviceEventInput = z.infer<typeof UsbDeviceEventSchema>;
+export type EdrFilterParamsInput = z.infer<typeof EdrFilterParamsSchema>;
+export type SimulateEdrScenarioInputType = z.infer<typeof SimulateEdrScenarioSchema>;
+export type GetProcessTreeInputType = z.infer<typeof GetProcessTreeSchema>;
+export type GetEndpointInvestigationInputType = z.infer<typeof GetEndpointInvestigationSchema>;
 

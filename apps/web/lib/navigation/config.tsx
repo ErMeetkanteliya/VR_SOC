@@ -57,11 +57,18 @@ export const BASE44_NAV_GROUPS: NavGroupConfig[] = [
       },
       {
         id: "agents",
-        label: "Agents (EDR)",
+        label: "Agents (Fleet)",
         href: "/agents",
         icon: <Server className="w-4 h-4" />,
         badge: "156",
         permission: "agents:read",
+      },
+      {
+        id: "edr",
+        label: "EDR Investigation",
+        href: "/edr",
+        icon: <ShieldAlert className="w-4 h-4" />,
+        permission: "telemetry:read",
       },
       {
         id: "alerts",

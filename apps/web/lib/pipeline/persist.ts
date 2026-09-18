@@ -155,6 +155,84 @@ export async function persistPipelinePackage(
       });
     }
 
+    if (pkg.registry && pkg.event.asset_id) {
+      await supabase.from("registry_events").insert({
+        organization_id: pkg.event.organization_id,
+        asset_id: pkg.event.asset_id,
+        agent_id: pkg.event.agent_id,
+        hive: pkg.registry.hive,
+        key_path: pkg.registry.key_path,
+        value_name: pkg.registry.value_name,
+        value_data: pkg.registry.value_data,
+        value_type: pkg.registry.value_type,
+        action: pkg.registry.action,
+        occurred_at: pkg.registry.occurred_at,
+      });
+    }
+
+    if (pkg.service && pkg.event.asset_id) {
+      await supabase.from("endpoint_services").insert({
+        organization_id: pkg.event.organization_id,
+        asset_id: pkg.event.asset_id,
+        agent_id: pkg.event.agent_id,
+        service_name: pkg.service.service_name,
+        display_name: pkg.service.display_name,
+        executable_path: pkg.service.executable_path,
+        start_type: pkg.service.start_type,
+        status: pkg.service.status,
+        action: pkg.service.action,
+        account_name: pkg.service.account_name,
+        occurred_at: pkg.service.occurred_at,
+      });
+    }
+
+    if (pkg.scheduledTask && pkg.event.asset_id) {
+      await supabase.from("scheduled_task_events").insert({
+        organization_id: pkg.event.organization_id,
+        asset_id: pkg.event.asset_id,
+        agent_id: pkg.event.agent_id,
+        task_name: pkg.scheduledTask.task_name,
+        task_path: pkg.scheduledTask.task_path,
+        action: pkg.scheduledTask.action,
+        command: pkg.scheduledTask.command,
+        arguments: pkg.scheduledTask.arguments,
+        run_as_user: pkg.scheduledTask.run_as_user,
+        trigger_type: pkg.scheduledTask.trigger_type,
+        occurred_at: pkg.scheduledTask.occurred_at,
+      });
+    }
+
+    if (pkg.startupItem && pkg.event.asset_id) {
+      await supabase.from("startup_items").insert({
+        organization_id: pkg.event.organization_id,
+        asset_id: pkg.event.asset_id,
+        agent_id: pkg.event.agent_id,
+        name: pkg.startupItem.name,
+        location_type: pkg.startupItem.location_type,
+        location_path: pkg.startupItem.location_path,
+        command: pkg.startupItem.command,
+        user_context: pkg.startupItem.user_context,
+        action: pkg.startupItem.action,
+        occurred_at: pkg.startupItem.occurred_at,
+      });
+    }
+
+    if (pkg.usb && pkg.event.asset_id) {
+      await supabase.from("usb_events").insert({
+        organization_id: pkg.event.organization_id,
+        asset_id: pkg.event.asset_id,
+        agent_id: pkg.event.agent_id,
+        vendor_id: pkg.usb.vendor_id,
+        product_id: pkg.usb.product_id,
+        device_name: pkg.usb.device_name,
+        device_class: pkg.usb.device_class,
+        serial_number: pkg.usb.serial_number,
+        drive_letter: pkg.usb.drive_letter,
+        action: pkg.usb.action,
+        occurred_at: pkg.usb.occurred_at,
+      });
+    }
+
     return {
       success: true,
       stage: "Stored",

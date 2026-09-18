@@ -39,6 +39,11 @@ export interface ParsedPayload {
   process?: PipelineIngestionInput["process"];
   file?: PipelineIngestionInput["file"];
   network?: PipelineIngestionInput["network"];
+  registry?: PipelineIngestionInput["registry"];
+  service?: PipelineIngestionInput["service"];
+  scheduledTask?: PipelineIngestionInput["scheduledTask"];
+  startupItem?: PipelineIngestionInput["startupItem"];
+  usb?: PipelineIngestionInput["usb"];
 }
 
 /**
@@ -140,5 +145,10 @@ export function parseTelemetryPayload(payload: PipelineIngestionInput): ParsedPa
     process: payload.process,
     file: payload.file,
     network: payload.network,
+    registry: payload.registry,
+    service: payload.service,
+    scheduledTask: payload.scheduledTask,
+    startupItem: payload.startupItem,
+    usb: payload.usb,
   };
 }

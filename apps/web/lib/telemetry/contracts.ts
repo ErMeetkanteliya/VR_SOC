@@ -4,6 +4,21 @@ import type {
   ProcessRecord,
   FileRecord,
   NetworkConnectionRecord,
+  RegistryEvent,
+  EndpointServiceEvent,
+  ScheduledTaskEvent,
+  StartupItem,
+  UsbDeviceEvent,
+  RegistryHive,
+  RegistryAction,
+  ServiceStartType,
+  ServiceStatus,
+  ServiceAction,
+  ScheduledTaskAction,
+  ScheduledTaskTrigger,
+  StartupItemLocation,
+  StartupItemAction,
+  UsbDeviceAction,
   SeverityLevel,
   LogLevel,
   LogParseStatus,
@@ -40,11 +55,14 @@ export interface RawTelemetryPayload {
   normalizedFields?: Record<string, unknown>;
   tags?: string[];
   process?: {
+    pid?: number;
+    ppid?: number;
     name: string;
     executablePath: string;
     commandLine?: string;
     sha256?: string;
     md5?: string;
+    username?: string;
     integrityLevel?: "Low" | "Medium" | "High" | "System";
   };
   file?: {
@@ -67,6 +85,49 @@ export interface RawTelemetryPayload {
     bytesSent?: number;
     bytesReceived?: number;
   };
+  registry?: {
+    hive: RegistryHive;
+    keyPath: string;
+    valueName?: string;
+    valueData?: string;
+    valueType?: string;
+    action: RegistryAction;
+  };
+  service?: {
+    serviceName: string;
+    displayName?: string;
+    executablePath?: string;
+    startType?: ServiceStartType;
+    status?: ServiceStatus;
+    action?: ServiceAction;
+    accountName?: string;
+  };
+  scheduledTask?: {
+    taskName: string;
+    taskPath?: string;
+    action?: ScheduledTaskAction;
+    command?: string;
+    arguments?: string;
+    runAsUser?: string;
+    triggerType?: ScheduledTaskTrigger;
+  };
+  startupItem?: {
+    name: string;
+    locationType: StartupItemLocation;
+    locationPath: string;
+    command: string;
+    userContext?: string;
+    action?: StartupItemAction;
+  };
+  usb?: {
+    vendorId?: string;
+    productId?: string;
+    deviceName: string;
+    deviceClass?: string;
+    serialNumber?: string;
+    driveLetter?: string;
+    action?: UsbDeviceAction;
+  };
 }
 
 export interface NormalizedTelemetryPackage {
@@ -75,6 +136,11 @@ export interface NormalizedTelemetryPackage {
   process?: Omit<ProcessRecord, "id" | "created_at">;
   file?: Omit<FileRecord, "id" | "created_at" | "updated_at">;
   network?: Omit<NetworkConnectionRecord, "id" | "created_at">;
+  registry?: Omit<RegistryEvent, "id" | "created_at">;
+  service?: Omit<EndpointServiceEvent, "id" | "created_at">;
+  scheduledTask?: Omit<ScheduledTaskEvent, "id" | "created_at">;
+  startupItem?: Omit<StartupItem, "id" | "created_at">;
+  usb?: Omit<UsbDeviceEvent, "id" | "created_at">;
 }
 
 /**
@@ -136,11 +202,12 @@ export function normalizeTelemetryPayload(
       organization_id: organizationId,
       asset_id: context.assetId,
       agent_id: context.agentId || null,
-      pid: Math.floor(1000 + Math.random() * 9000),
-      ppid: 4, // Default system/explorer parent
+      pid: payload.process.pid || Math.floor(1000 + Math.random() * 9000),
+      ppid: payload.process.ppid !== undefined ? payload.process.ppid : 4,
       name: payload.process.name,
       executable_path: payload.process.executablePath,
       command_line: payload.process.commandLine || payload.process.executablePath,
+      username: payload.process.username || "SYSTEM",
       sha256: payload.process.sha256 || null,
       md5: payload.process.md5 || null,
       started_at: occurredAt,
@@ -186,11 +253,105 @@ export function normalizeTelemetryPayload(
     };
   }
 
+  let registry: Omit<RegistryEvent, "id" | "created_at"> | undefined;
+  if (payload.registry && context?.assetId) {
+    registry = {
+      organization_id: organizationId,
+      asset_id: context.assetId,
+      agent_id: context.agentId || null,
+      hive: payload.registry.hive,
+      key_path: payload.registry.keyPath,
+      value_name: payload.registry.valueName || null,
+      value_data: payload.registry.valueData || null,
+      value_type: payload.registry.valueType || "REG_SZ",
+      action: payload.registry.action,
+      occurred_at: occurredAt,
+      metadata: {},
+    };
+  }
+
+  let service: Omit<EndpointServiceEvent, "id" | "created_at"> | undefined;
+  if (payload.service && context?.assetId) {
+    service = {
+      organization_id: organizationId,
+      asset_id: context.assetId,
+      agent_id: context.agentId || null,
+      service_name: payload.service.serviceName,
+      display_name: payload.service.displayName || payload.service.serviceName,
+      executable_path: payload.service.executablePath || null,
+      start_type: payload.service.startType || "Auto",
+      status: payload.service.status || "Running",
+      action: payload.service.action || "Modified",
+      account_name: payload.service.accountName || "LocalSystem",
+      occurred_at: occurredAt,
+      metadata: {},
+    };
+  }
+
+  let scheduledTask: Omit<ScheduledTaskEvent, "id" | "created_at"> | undefined;
+  if (payload.scheduledTask && context?.assetId) {
+    scheduledTask = {
+      organization_id: organizationId,
+      asset_id: context.assetId,
+      agent_id: context.agentId || null,
+      task_name: payload.scheduledTask.taskName,
+      task_path: payload.scheduledTask.taskPath || "\\",
+      action: payload.scheduledTask.action || "Created",
+      command: payload.scheduledTask.command || null,
+      arguments: payload.scheduledTask.arguments || null,
+      run_as_user: payload.scheduledTask.runAsUser || "SYSTEM",
+      trigger_type: payload.scheduledTask.triggerType || "Daily",
+      occurred_at: occurredAt,
+      metadata: {},
+    };
+  }
+
+  let startupItem: Omit<StartupItem, "id" | "created_at"> | undefined;
+  if (payload.startupItem && context?.assetId) {
+    startupItem = {
+      organization_id: organizationId,
+      asset_id: context.assetId,
+      agent_id: context.agentId || null,
+      name: payload.startupItem.name,
+      location_type: payload.startupItem.locationType,
+      location_path: payload.startupItem.locationPath,
+      command: payload.startupItem.command,
+      user_context: payload.startupItem.userContext || "SYSTEM",
+      action: payload.startupItem.action || "Added",
+      occurred_at: occurredAt,
+      metadata: {},
+    };
+  }
+
+  let usb: Omit<UsbDeviceEvent, "id" | "created_at"> | undefined;
+  if (payload.usb && context?.assetId) {
+    usb = {
+      organization_id: organizationId,
+      asset_id: context.assetId,
+      agent_id: context.agentId || null,
+      vendor_id: payload.usb.vendorId || null,
+      product_id: payload.usb.productId || null,
+      device_name: payload.usb.deviceName,
+      device_class: payload.usb.deviceClass || "Mass Storage",
+      serial_number: payload.usb.serialNumber || null,
+      drive_letter: payload.usb.driveLetter || null,
+      action: payload.usb.action || "Connected",
+      occurred_at: occurredAt,
+      metadata: {},
+    };
+  }
+
   return {
     event,
     log,
     process,
     file,
     network,
+    registry,
+    service,
+    scheduledTask,
+    startupItem,
+    usb,
   };
 }
+
