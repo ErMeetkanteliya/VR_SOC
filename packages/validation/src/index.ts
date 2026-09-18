@@ -143,6 +143,41 @@ export const EdrSimulationScenarioTypeSchema = z.enum([
   "multi_stage_endpoint_attack",
 ]);
 
+// Phase 18 XDR Enums
+export const XdrTelemetrySourceSchema = z.enum([
+  "endpoint",
+  "identity",
+  "email",
+  "dns",
+  "cloud",
+  "network",
+  "firewall",
+  "authentication",
+]);
+export const DnsQueryTypeSchema = z.enum(["A", "AAAA", "CNAME", "MX", "TXT", "PTR", "SRV", "NS", "SOA"]);
+export const EmailActionSchema = z.enum(["Delivered", "Quarantined", "Blocked", "Filtered", "Deleted"]);
+export const SpfVerdictSchema = z.enum(["Pass", "Fail", "SoftFail", "Neutral", "None"]);
+export const DkimVerdictSchema = z.enum(["Pass", "Fail", "None"]);
+export const CloudProviderSchema = z.enum(["AWS", "Azure", "GCP", "Kubernetes", "SaaS"]);
+export const CloudStatusSchema = z.enum(["Success", "Failure", "Denied", "Throttled"]);
+export const FirewallActionSchema = z.enum(["Allowed", "Blocked", "Dropped", "Rejected", "Alerted"]);
+export const XdrRelationshipTypeSchema = z.enum([
+  "same_identity",
+  "same_asset",
+  "same_ip",
+  "same_domain",
+  "temporal_killchain",
+  "cross_source_threat",
+  "related_alert",
+]);
+export const XdrSimulationScenarioTypeSchema = z.enum([
+  "phishing_to_endpoint_c2",
+  "cloud_credential_theft_and_exfil",
+  "lateral_movement_and_domain_recon",
+  "ransomware_precursor_chain",
+]);
+
+
 // Auth Schemas
 export const LoginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -654,7 +689,54 @@ export const PipelineIngestionSchema = z.object({
     driveLetter: z.string().optional(),
     action: UsbDeviceActionSchema.optional(),
   }).optional(),
+  dns: z.object({
+    queryDomain: z.string().min(1),
+    queryType: DnsQueryTypeSchema.default("A").optional(),
+    resolvedIps: z.array(z.string()).optional(),
+    responseCode: z.string().default("NOERROR").optional(),
+    isMalicious: z.boolean().default(false).optional(),
+    threatCategory: z.string().optional(),
+  }).optional(),
+  email: z.object({
+    sender: z.string().min(1),
+    recipient: z.string().min(1),
+    subject: z.string(),
+    messageId: z.string().optional(),
+    attachmentName: z.string().optional(),
+    attachmentSha256: z.string().optional(),
+    attachmentSizeBytes: z.number().optional(),
+    action: EmailActionSchema.default("Delivered").optional(),
+    spfVerdict: SpfVerdictSchema.default("Pass").optional(),
+    dkimVerdict: DkimVerdictSchema.default("Pass").optional(),
+    isPhishing: z.boolean().default(false).optional(),
+    threatLevel: SeverityLevelSchema.default("Low").optional(),
+  }).optional(),
+  cloud: z.object({
+    cloudProvider: CloudProviderSchema.default("AWS").optional(),
+    serviceName: z.string().min(1),
+    eventName: z.string().min(1),
+    callerIp: z.string().optional(),
+    userAgent: z.string().optional(),
+    region: z.string().optional(),
+    resourceArn: z.string().optional(),
+    status: CloudStatusSchema.default("Success").optional(),
+    requestParameters: z.record(z.unknown()).optional(),
+    responseElements: z.record(z.unknown()).optional(),
+  }).optional(),
+  firewall: z.object({
+    srcIp: z.string(),
+    dstIp: z.string(),
+    srcPort: z.number().int().min(0).max(65535),
+    dstPort: z.number().int().min(0).max(65535),
+    protocol: NetworkProtocolSchema.default("TCP").optional(),
+    action: FirewallActionSchema.default("Allowed").optional(),
+    ruleId: z.string().optional(),
+    ruleName: z.string().optional(),
+    bytesTransferred: z.number().optional(),
+    threatName: z.string().optional(),
+  }).optional(),
 });
+
 
 export const PipelineBatchIngestionSchema = z.object({
   payloads: z.array(PipelineIngestionSchema).min(1).max(100),
@@ -1217,4 +1299,165 @@ export type EdrFilterParamsInput = z.infer<typeof EdrFilterParamsSchema>;
 export type SimulateEdrScenarioInputType = z.infer<typeof SimulateEdrScenarioSchema>;
 export type GetProcessTreeInputType = z.infer<typeof GetProcessTreeSchema>;
 export type GetEndpointInvestigationInputType = z.infer<typeof GetEndpointInvestigationSchema>;
+
+// ------------------------------------------------------------------------------
+// Phase 18 XDR Validation Schemas
+// ------------------------------------------------------------------------------
+
+export const DnsEventSchema = z.object({
+  id: z.string().uuid().optional(),
+  organization_id: z.string().uuid("Invalid organization ID format"),
+  asset_id: z.string().uuid().nullable().optional(),
+  agent_id: z.string().uuid().nullable().optional(),
+  process_id: z.string().uuid().nullable().optional(),
+  query_domain: z.string().min(1, "Query domain is required"),
+  query_type: DnsQueryTypeSchema.default("A"),
+  resolved_ips: z.array(z.string()).default([]),
+  response_code: z.string().default("NOERROR"),
+  is_malicious: z.boolean().default(false),
+  threat_category: z.string().nullable().optional(),
+  occurred_at: z.string().datetime({ offset: true }).or(z.string()),
+  metadata: z.record(z.unknown()).default({}),
+});
+
+export const EmailEventSchema = z.object({
+  id: z.string().uuid().optional(),
+  organization_id: z.string().uuid("Invalid organization ID format"),
+  identity_id: z.string().uuid().nullable().optional(),
+  sender: z.string().min(1, "Sender is required"),
+  recipient: z.string().min(1, "Recipient is required"),
+  subject: z.string().min(1, "Subject is required"),
+  message_id: z.string().nullable().optional(),
+  attachment_name: z.string().nullable().optional(),
+  attachment_sha256: z.string().nullable().optional(),
+  attachment_size_bytes: z.number().nullable().optional(),
+  action: EmailActionSchema.default("Delivered"),
+  spf_verdict: SpfVerdictSchema.nullable().optional(),
+  dkim_verdict: DkimVerdictSchema.nullable().optional(),
+  is_phishing: z.boolean().default(false),
+  threat_level: SeverityLevelSchema.default("Low"),
+  occurred_at: z.string().datetime({ offset: true }).or(z.string()),
+  metadata: z.record(z.unknown()).default({}),
+});
+
+export const CloudEventSchema = z.object({
+  id: z.string().uuid().optional(),
+  organization_id: z.string().uuid("Invalid organization ID format"),
+  identity_id: z.string().uuid().nullable().optional(),
+  cloud_provider: CloudProviderSchema.default("AWS"),
+  service_name: z.string().min(1, "Service name is required"),
+  event_name: z.string().min(1, "Event name is required"),
+  caller_ip: z.string().nullable().optional(),
+  user_agent: z.string().nullable().optional(),
+  region: z.string().default("us-east-1").optional(),
+  resource_arn: z.string().nullable().optional(),
+  status: CloudStatusSchema.default("Success"),
+  request_parameters: z.record(z.unknown()).default({}),
+  response_elements: z.record(z.unknown()).default({}),
+  occurred_at: z.string().datetime({ offset: true }).or(z.string()),
+  metadata: z.record(z.unknown()).default({}),
+});
+
+export const FirewallEventSchema = z.object({
+  id: z.string().uuid().optional(),
+  organization_id: z.string().uuid("Invalid organization ID format"),
+  asset_id: z.string().uuid().nullable().optional(),
+  src_ip: z.string().min(1, "Source IP is required"),
+  dst_ip: z.string().min(1, "Destination IP is required"),
+  src_port: z.number().int().min(0).max(65535),
+  dst_port: z.number().int().min(0).max(65535),
+  protocol: NetworkProtocolSchema.default("TCP"),
+  action: FirewallActionSchema.default("Allowed"),
+  rule_id: z.string().nullable().optional(),
+  rule_name: z.string().nullable().optional(),
+  bytes_transferred: z.number().default(0).optional(),
+  threat_name: z.string().nullable().optional(),
+  occurred_at: z.string().datetime({ offset: true }).or(z.string()),
+  metadata: z.record(z.unknown()).default({}),
+});
+
+export const XdrSharedIdentifiersSchema = z.object({
+  ips: z.array(z.string()).optional(),
+  domains: z.array(z.string()).optional(),
+  usernames: z.array(z.string()).optional(),
+  emails: z.array(z.string()).optional(),
+  hashes: z.array(z.string()).optional(),
+  hostnames: z.array(z.string()).optional(),
+});
+
+export const XdrExplanationStepSchema = z.object({
+  step: z.number().int().min(1),
+  title: z.string().min(1),
+  source: XdrTelemetrySourceSchema,
+  description: z.string(),
+  timestamp: z.string(),
+  evidence: z.record(z.unknown()).default({}),
+});
+
+export const XdrCorrelationResultSchema = z.object({
+  id: z.string().uuid().optional(),
+  organization_id: z.string().uuid("Invalid organization ID format"),
+  correlation_code: z.string().min(1),
+  title: z.string().min(1),
+  description: z.string(),
+  severity: SeverityLevelSchema.default("High"),
+  relationship_type: XdrRelationshipTypeSchema,
+  confidence_score: z.number().int().min(0).max(100).default(85),
+  primary_entity_type: z.enum(["asset", "identity", "ip", "domain", "alert"]),
+  primary_entity_id: z.string().min(1),
+  primary_entity_name: z.string().min(1),
+  time_window_start: z.string(),
+  time_window_end: z.string(),
+  duration_minutes: z.number().int().default(60),
+  explanation: z.array(XdrExplanationStepSchema),
+  shared_identifiers: XdrSharedIdentifiersSchema.default({}),
+  source_counts: z.record(z.number()).default({}),
+  matched_event_ids: z.array(z.string()).default([]),
+  related_asset_ids: z.array(z.string()).default([]),
+  related_identity_ids: z.array(z.string()).default([]),
+  related_alert_ids: z.array(z.string()).default([]),
+  status: z.enum(["Active", "Investigating", "Resolved", "Dismissed"]).default("Active"),
+  metadata: z.record(z.unknown()).default({}),
+  created_at: z.string().optional(),
+  updated_at: z.string().optional(),
+});
+
+export const XdrFilterParamsSchema = z.object({
+  query: z.string().max(256).optional(),
+  sources: z.array(XdrTelemetrySourceSchema).optional(),
+  relationshipType: z.union([XdrRelationshipTypeSchema, z.literal("ALL")]).default("ALL").optional(),
+  minSeverity: z.union([SeverityLevelSchema, z.literal("ALL")]).default("ALL").optional(),
+  timeRange: z.enum(["15m", "30m", "1h", "6h", "12h", "24h", "7d", "30d", "custom", "all"]).optional(),
+  startTime: z.string().datetime({ offset: true }).or(z.string()).optional(),
+  endTime: z.string().datetime({ offset: true }).or(z.string()).optional(),
+  assetId: z.string().uuid().optional(),
+  identityId: z.string().uuid().optional(),
+  ipAddress: z.string().optional(),
+  domain: z.string().optional(),
+  page: z.number().int().min(1).default(1).optional(),
+  pageSize: z.number().int().min(1).max(100).default(20).optional(),
+});
+
+export const SimulateXdrScenarioSchema = z.object({
+  organizationId: z.string().uuid("Invalid organization ID format").optional(),
+  scenarioType: XdrSimulationScenarioTypeSchema,
+  targetAssetId: z.string().uuid().optional(),
+  targetIdentityId: z.string().uuid().optional(),
+});
+
+export const GetXdrInvestigationSchema = z.object({
+  organizationId: z.string().uuid("Invalid organization ID format").optional(),
+  correlationId: z.string().min(1, "Correlation ID required"),
+  filters: XdrFilterParamsSchema.optional(),
+});
+
+export type DnsEventInput = z.infer<typeof DnsEventSchema>;
+export type EmailEventInput = z.infer<typeof EmailEventSchema>;
+export type CloudEventInput = z.infer<typeof CloudEventSchema>;
+export type FirewallEventInput = z.infer<typeof FirewallEventSchema>;
+export type XdrCorrelationResultInput = z.infer<typeof XdrCorrelationResultSchema>;
+export type XdrFilterParamsInput = z.infer<typeof XdrFilterParamsSchema>;
+export type SimulateXdrScenarioInputType = z.infer<typeof SimulateXdrScenarioSchema>;
+export type GetXdrInvestigationInputType = z.infer<typeof GetXdrInvestigationSchema>;
+
 

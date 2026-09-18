@@ -28,7 +28,9 @@ import {
   FileSpreadsheet,
   FlaskConical,
   Wrench,
+  Network,
 } from "lucide-react";
+
 
 export interface NavItemConfig {
   id: string;
@@ -71,6 +73,14 @@ export const BASE44_NAV_GROUPS: NavGroupConfig[] = [
         permission: "telemetry:read",
       },
       {
+        id: "xdr",
+        label: "XDR Correlation",
+        href: "/xdr",
+        icon: <Network className="w-4 h-4" />,
+        badge: "XDR",
+        permission: "telemetry:read",
+      },
+      {
         id: "alerts",
         label: "Alerts",
         href: "/alerts",
@@ -79,6 +89,7 @@ export const BASE44_NAV_GROUPS: NavGroupConfig[] = [
         badgeVariant: "critical",
         permission: "alerts:read",
       },
+
       {
         id: "incidents",
         label: "Incidents",

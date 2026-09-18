@@ -233,6 +233,77 @@ export async function persistPipelinePackage(
       });
     }
 
+    if (pkg.dns) {
+      await supabase.from("dns_events").insert({
+        organization_id: pkg.event.organization_id,
+        asset_id: pkg.dns.asset_id,
+        agent_id: pkg.dns.agent_id,
+        query_domain: pkg.dns.query_domain,
+        query_type: pkg.dns.query_type,
+        resolved_ips: pkg.dns.resolved_ips,
+        response_code: pkg.dns.response_code,
+        is_malicious: pkg.dns.is_malicious,
+        threat_category: pkg.dns.threat_category,
+        occurred_at: pkg.dns.occurred_at,
+      });
+    }
+
+    if (pkg.email) {
+      await supabase.from("email_events").insert({
+        organization_id: pkg.event.organization_id,
+        identity_id: pkg.email.identity_id,
+        sender: pkg.email.sender,
+        recipient: pkg.email.recipient,
+        subject: pkg.email.subject,
+        message_id: pkg.email.message_id,
+        attachment_name: pkg.email.attachment_name,
+        attachment_sha256: pkg.email.attachment_sha256,
+        attachment_size_bytes: pkg.email.attachment_size_bytes,
+        action: pkg.email.action,
+        spf_verdict: pkg.email.spf_verdict,
+        dkim_verdict: pkg.email.dkim_verdict,
+        is_phishing: pkg.email.is_phishing,
+        threat_level: pkg.email.threat_level,
+        occurred_at: pkg.email.occurred_at,
+      });
+    }
+
+    if (pkg.cloud) {
+      await supabase.from("cloud_events").insert({
+        organization_id: pkg.event.organization_id,
+        identity_id: pkg.cloud.identity_id,
+        cloud_provider: pkg.cloud.cloud_provider,
+        service_name: pkg.cloud.service_name,
+        event_name: pkg.cloud.event_name,
+        caller_ip: pkg.cloud.caller_ip,
+        user_agent: pkg.cloud.user_agent,
+        region: pkg.cloud.region,
+        resource_arn: pkg.cloud.resource_arn,
+        status: pkg.cloud.status,
+        request_parameters: pkg.cloud.request_parameters,
+        response_elements: pkg.cloud.response_elements,
+        occurred_at: pkg.cloud.occurred_at,
+      });
+    }
+
+    if (pkg.firewall) {
+      await supabase.from("firewall_events").insert({
+        organization_id: pkg.event.organization_id,
+        asset_id: pkg.firewall.asset_id,
+        src_ip: pkg.firewall.src_ip,
+        dst_ip: pkg.firewall.dst_ip,
+        src_port: pkg.firewall.src_port,
+        dst_port: pkg.firewall.dst_port,
+        protocol: pkg.firewall.protocol,
+        action: pkg.firewall.action,
+        rule_id: pkg.firewall.rule_id,
+        rule_name: pkg.firewall.rule_name,
+        bytes_transferred: pkg.firewall.bytes_transferred,
+        threat_name: pkg.firewall.threat_name,
+        occurred_at: pkg.firewall.occurred_at,
+      });
+    }
+
     return {
       success: true,
       stage: "Stored",
@@ -242,6 +313,7 @@ export async function persistPipelinePackage(
       processingDurationMs: Date.now() - startTime,
       enrichments: pkg.enrichments,
     };
+
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unexpected persistence failure.";
     console.error("[persistPipelinePackage] Error:", message);

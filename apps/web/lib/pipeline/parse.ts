@@ -44,6 +44,10 @@ export interface ParsedPayload {
   scheduledTask?: PipelineIngestionInput["scheduledTask"];
   startupItem?: PipelineIngestionInput["startupItem"];
   usb?: PipelineIngestionInput["usb"];
+  dns?: PipelineIngestionInput["dns"];
+  email?: PipelineIngestionInput["email"];
+  cloud?: PipelineIngestionInput["cloud"];
+  firewall?: PipelineIngestionInput["firewall"];
 }
 
 /**
@@ -150,5 +154,10 @@ export function parseTelemetryPayload(payload: PipelineIngestionInput): ParsedPa
     scheduledTask: payload.scheduledTask,
     startupItem: payload.startupItem,
     usb: payload.usb,
+    dns: payload.dns,
+    email: payload.email,
+    cloud: payload.cloud,
+    firewall: payload.firewall,
   };
 }
+

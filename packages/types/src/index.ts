@@ -1170,3 +1170,239 @@ export interface SimulateEdrScenarioInput {
   assetId: string;
   scenarioType: EdrSimulationScenarioType;
 }
+
+// ------------------------------------------------------------------------------
+// Phase 18 XDR Correlation & Multi-Source Telemetry Types
+// ------------------------------------------------------------------------------
+
+export type XdrTelemetrySource =
+  | "endpoint"
+  | "identity"
+  | "email"
+  | "dns"
+  | "cloud"
+  | "network"
+  | "firewall"
+  | "authentication";
+
+export type DnsQueryType = "A" | "AAAA" | "CNAME" | "MX" | "TXT" | "PTR" | "SRV" | "NS" | "SOA";
+
+export interface DnsEvent {
+  id: string;
+  organization_id: string;
+  asset_id?: string | null;
+  agent_id?: string | null;
+  process_id?: string | null;
+  query_domain: string;
+  query_type: DnsQueryType;
+  resolved_ips?: string[];
+  response_code: string;
+  is_malicious: boolean;
+  threat_category?: string | null;
+  occurred_at: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  asset?: Asset;
+  process?: ProcessRecord;
+}
+
+export type EmailAction = "Delivered" | "Quarantined" | "Blocked" | "Filtered" | "Deleted";
+export type SpfVerdict = "Pass" | "Fail" | "SoftFail" | "Neutral" | "None";
+export type DkimVerdict = "Pass" | "Fail" | "None";
+
+export interface EmailEvent {
+  id: string;
+  organization_id: string;
+  identity_id?: string | null;
+  sender: string;
+  recipient: string;
+  subject: string;
+  message_id?: string | null;
+  attachment_name?: string | null;
+  attachment_sha256?: string | null;
+  attachment_size_bytes?: number | null;
+  action: EmailAction;
+  spf_verdict?: SpfVerdict | null;
+  dkim_verdict?: DkimVerdict | null;
+  is_phishing: boolean;
+  threat_level: SeverityLevel;
+  occurred_at: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  identity?: SocIdentity;
+}
+
+export type CloudProvider = "AWS" | "Azure" | "GCP" | "Kubernetes" | "SaaS";
+export type CloudStatus = "Success" | "Failure" | "Denied" | "Throttled";
+
+export interface CloudEvent {
+  id: string;
+  organization_id: string;
+  identity_id?: string | null;
+  cloud_provider: CloudProvider;
+  service_name: string;
+  event_name: string;
+  caller_ip?: string | null;
+  user_agent?: string | null;
+  region?: string | null;
+  resource_arn?: string | null;
+  status: CloudStatus;
+  request_parameters?: Record<string, unknown>;
+  response_elements?: Record<string, unknown>;
+  occurred_at: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  identity?: SocIdentity;
+}
+
+export type FirewallAction = "Allowed" | "Blocked" | "Dropped" | "Rejected" | "Alerted";
+
+export interface FirewallEvent {
+  id: string;
+  organization_id: string;
+  asset_id?: string | null;
+  src_ip: string;
+  dst_ip: string;
+  src_port: number;
+  dst_port: number;
+  protocol: NetworkProtocol;
+  action: FirewallAction;
+  rule_id?: string | null;
+  rule_name?: string | null;
+  bytes_transferred?: number;
+  threat_name?: string | null;
+  occurred_at: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  asset?: Asset;
+}
+
+export type XdrRelationshipType =
+  | "same_identity"
+  | "same_asset"
+  | "same_ip"
+  | "same_domain"
+  | "temporal_killchain"
+  | "cross_source_threat"
+  | "related_alert";
+
+export interface XdrSharedIdentifiers {
+  ips?: string[];
+  domains?: string[];
+  usernames?: string[];
+  emails?: string[];
+  hashes?: string[];
+  hostnames?: string[];
+}
+
+export interface XdrExplanationStep {
+  step: number;
+  title: string;
+  source: XdrTelemetrySource;
+  description: string;
+  timestamp: string;
+  evidence: Record<string, unknown>;
+}
+
+export interface XdrCorrelationResult {
+  id: string;
+  organization_id: string;
+  correlation_code: string;
+  title: string;
+  description: string;
+  severity: SeverityLevel;
+  relationship_type: XdrRelationshipType;
+  confidence_score: number;
+  primary_entity_type: "asset" | "identity" | "ip" | "domain" | "alert";
+  primary_entity_id: string;
+  primary_entity_name: string;
+  time_window_start: string;
+  time_window_end: string;
+  duration_minutes: number;
+  explanation: XdrExplanationStep[];
+  shared_identifiers: XdrSharedIdentifiers;
+  source_counts: Partial<Record<XdrTelemetrySource, number>>;
+  matched_event_ids: string[];
+  related_asset_ids: string[];
+  related_identity_ids: string[];
+  related_alert_ids: string[];
+  status: "Active" | "Investigating" | "Resolved" | "Dismissed";
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface XdrTimelineItem {
+  id: string;
+  occurredAt: string;
+  source: XdrTelemetrySource;
+  sourceHost?: string;
+  category: string;
+  action: string;
+  title: string;
+  summary: string;
+  severity: SeverityLevel;
+  assetId?: string;
+  identityId?: string;
+  username?: string;
+  hostname?: string;
+  details: Record<string, unknown>;
+  rawPayload?: Record<string, unknown>;
+}
+
+export interface XdrFilterParams {
+  query?: string;
+  sources?: XdrTelemetrySource[];
+  relationshipType?: XdrRelationshipType | "ALL";
+  minSeverity?: SeverityLevel | "ALL";
+  timeRange?: SiemTimeRange;
+  startTime?: string;
+  endTime?: string;
+  assetId?: string;
+  identityId?: string;
+  ipAddress?: string;
+  domain?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface XdrInvestigationSummary {
+  totalCorrelatedIncidents: number;
+  activeSourcesCount: number;
+  crossSourceThreatCount: number;
+  avgConfidenceScore: number;
+  sourceDistribution: Record<XdrTelemetrySource, number>;
+}
+
+export interface XdrInvestigationPackage {
+  correlation: XdrCorrelationResult;
+  primaryAsset?: Asset | null;
+  primaryIdentity?: SocIdentity | null;
+  relatedAssets: Asset[];
+  relatedIdentities: SocIdentity[];
+  relatedAlerts: Alert[];
+  timeline: XdrTimelineItem[];
+  sourceDistribution: Record<XdrTelemetrySource, number>;
+  dnsEvents: DnsEvent[];
+  emailEvents: EmailEvent[];
+  cloudEvents: CloudEvent[];
+  firewallEvents: FirewallEvent[];
+  processes: ProcessRecord[];
+  networkConnections: NetworkConnectionRecord[];
+  events: TelemetryEvent[];
+  logs: LogRecord[];
+}
+
+export type XdrSimulationScenarioType =
+  | "phishing_to_endpoint_c2"
+  | "cloud_credential_theft_and_exfil"
+  | "lateral_movement_and_domain_recon"
+  | "ransomware_precursor_chain";
+
+export interface SimulateXdrScenarioInput {
+  organizationId: string;
+  scenarioType: XdrSimulationScenarioType;
+  targetAssetId?: string;
+  targetIdentityId?: string;
+}
+

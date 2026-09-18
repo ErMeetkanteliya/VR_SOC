@@ -9,6 +9,10 @@ import type {
   ScheduledTaskEvent,
   StartupItem,
   UsbDeviceEvent,
+  DnsEvent,
+  EmailEvent,
+  CloudEvent,
+  FirewallEvent,
   RegistryHive,
   RegistryAction,
   ServiceStartType,
@@ -19,6 +23,13 @@ import type {
   StartupItemLocation,
   StartupItemAction,
   UsbDeviceAction,
+  DnsQueryType,
+  EmailAction,
+  SpfVerdict,
+  DkimVerdict,
+  CloudProvider,
+  CloudStatus,
+  FirewallAction,
   SeverityLevel,
   LogLevel,
   LogParseStatus,
@@ -128,6 +139,52 @@ export interface RawTelemetryPayload {
     driveLetter?: string;
     action?: UsbDeviceAction;
   };
+  dns?: {
+    queryDomain: string;
+    queryType?: DnsQueryType;
+    resolvedIps?: string[];
+    responseCode?: string;
+    isMalicious?: boolean;
+    threatCategory?: string;
+  };
+  email?: {
+    sender: string;
+    recipient: string;
+    subject: string;
+    messageId?: string;
+    attachmentName?: string;
+    attachmentSha256?: string;
+    attachmentSizeBytes?: number;
+    action?: EmailAction;
+    spfVerdict?: SpfVerdict;
+    dkimVerdict?: DkimVerdict;
+    isPhishing?: boolean;
+    threatLevel?: SeverityLevel;
+  };
+  cloud?: {
+    cloudProvider?: CloudProvider;
+    serviceName: string;
+    eventName: string;
+    callerIp?: string;
+    userAgent?: string;
+    region?: string;
+    resourceArn?: string;
+    status?: CloudStatus;
+    requestParameters?: Record<string, unknown>;
+    responseElements?: Record<string, unknown>;
+  };
+  firewall?: {
+    srcIp: string;
+    dstIp: string;
+    srcPort: number;
+    dstPort: number;
+    protocol?: NetworkProtocol;
+    action?: FirewallAction;
+    ruleId?: string;
+    ruleName?: string;
+    bytesTransferred?: number;
+    threatName?: string;
+  };
 }
 
 export interface NormalizedTelemetryPackage {
@@ -141,7 +198,12 @@ export interface NormalizedTelemetryPackage {
   scheduledTask?: Omit<ScheduledTaskEvent, "id" | "created_at">;
   startupItem?: Omit<StartupItem, "id" | "created_at">;
   usb?: Omit<UsbDeviceEvent, "id" | "created_at">;
+  dns?: Omit<DnsEvent, "id" | "created_at">;
+  email?: Omit<EmailEvent, "id" | "created_at">;
+  cloud?: Omit<CloudEvent, "id" | "created_at">;
+  firewall?: Omit<FirewallEvent, "id" | "created_at">;
 }
+
 
 /**
  * Transforms a raw telemetry description into canonical database entity packages.
@@ -341,6 +403,85 @@ export function normalizeTelemetryPayload(
     };
   }
 
+  let dns: Omit<DnsEvent, "id" | "created_at"> | undefined;
+  if (payload.dns) {
+    dns = {
+      organization_id: organizationId,
+      asset_id: context?.assetId || null,
+      agent_id: context?.agentId || null,
+      query_domain: payload.dns.queryDomain,
+      query_type: payload.dns.queryType || "A",
+      resolved_ips: payload.dns.resolvedIps || [],
+      response_code: payload.dns.responseCode || "NOERROR",
+      is_malicious: payload.dns.isMalicious || false,
+      threat_category: payload.dns.threatCategory || null,
+      occurred_at: occurredAt,
+      metadata: {},
+    };
+  }
+
+  let email: Omit<EmailEvent, "id" | "created_at"> | undefined;
+  if (payload.email) {
+    email = {
+      organization_id: organizationId,
+      identity_id: context?.identityId || null,
+      sender: payload.email.sender,
+      recipient: payload.email.recipient,
+      subject: payload.email.subject,
+      message_id: payload.email.messageId || null,
+      attachment_name: payload.email.attachmentName || null,
+      attachment_sha256: payload.email.attachmentSha256 || null,
+      attachment_size_bytes: payload.email.attachmentSizeBytes || null,
+      action: payload.email.action || "Delivered",
+      spf_verdict: payload.email.spfVerdict || "Pass",
+      dkim_verdict: payload.email.dkimVerdict || "Pass",
+      is_phishing: payload.email.isPhishing || false,
+      threat_level: payload.email.threatLevel || "Low",
+      occurred_at: occurredAt,
+      metadata: {},
+    };
+  }
+
+  let cloud: Omit<CloudEvent, "id" | "created_at"> | undefined;
+  if (payload.cloud) {
+    cloud = {
+      organization_id: organizationId,
+      identity_id: context?.identityId || null,
+      cloud_provider: payload.cloud.cloudProvider || "AWS",
+      service_name: payload.cloud.serviceName,
+      event_name: payload.cloud.eventName,
+      caller_ip: payload.cloud.callerIp || null,
+      user_agent: payload.cloud.userAgent || null,
+      region: payload.cloud.region || "us-east-1",
+      resource_arn: payload.cloud.resourceArn || null,
+      status: payload.cloud.status || "Success",
+      request_parameters: payload.cloud.requestParameters || {},
+      response_elements: payload.cloud.responseElements || {},
+      occurred_at: occurredAt,
+      metadata: {},
+    };
+  }
+
+  let firewall: Omit<FirewallEvent, "id" | "created_at"> | undefined;
+  if (payload.firewall) {
+    firewall = {
+      organization_id: organizationId,
+      asset_id: context?.assetId || null,
+      src_ip: payload.firewall.srcIp,
+      dst_ip: payload.firewall.dstIp,
+      src_port: payload.firewall.srcPort,
+      dst_port: payload.firewall.dstPort,
+      protocol: payload.firewall.protocol || "TCP",
+      action: payload.firewall.action || "Allowed",
+      rule_id: payload.firewall.ruleId || null,
+      rule_name: payload.firewall.ruleName || null,
+      bytes_transferred: payload.firewall.bytesTransferred || 0,
+      threat_name: payload.firewall.threatName || null,
+      occurred_at: occurredAt,
+      metadata: {},
+    };
+  }
+
   return {
     event,
     log,
@@ -352,6 +493,11 @@ export function normalizeTelemetryPayload(
     scheduledTask,
     startupItem,
     usb,
+    dns,
+    email,
+    cloud,
+    firewall,
   };
 }
+
 
