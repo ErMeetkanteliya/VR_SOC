@@ -1460,4 +1460,91 @@ export type XdrFilterParamsInput = z.infer<typeof XdrFilterParamsSchema>;
 export type SimulateXdrScenarioInputType = z.infer<typeof SimulateXdrScenarioSchema>;
 export type GetXdrInvestigationInputType = z.infer<typeof GetXdrInvestigationSchema>;
 
+// ==============================================================================
+// Phase 19: MITRE ATT&CK Intelligence & Entity Validation
+// ==============================================================================
+
+export const MitreTacticIdSchema = z.enum([
+  "TA0043",
+  "TA0042",
+  "TA0001",
+  "TA0002",
+  "TA0003",
+  "TA0004",
+  "TA0005",
+  "TA0006",
+  "TA0007",
+  "TA0008",
+  "TA0009",
+  "TA0011",
+  "TA0010",
+  "TA0040",
+]);
+
+export const MitreTacticSchema = z.object({
+  id: z.string().min(1),
+  external_id: z.string().min(1),
+  name: z.string().min(1),
+  description: z.string(),
+  order_index: z.number().int().default(0),
+  technique_count: z.number().int().optional(),
+});
+
+export const MitreMitigationRefSchema = z.object({
+  external_id: z.string().min(1),
+  name: z.string().min(1),
+  description: z.string(),
+});
+
+export const MitreExampleRefSchema = z.object({
+  source_or_actor: z.string().min(1),
+  description: z.string(),
+  reference_url: z.string().optional(),
+});
+
+export const MitreTechniqueSchema = z.object({
+  id: z.string().min(1),
+  external_id: z.string().min(1),
+  name: z.string().min(1),
+  description: z.string(),
+  tactic_external_id: z.string().min(1),
+  tactic_name: z.string().min(1),
+  is_subtechnique: z.boolean().default(false),
+  parent_technique_id: z.string().nullable().optional(),
+  platforms: z.array(z.string()).default([]),
+  data_sources: z.array(z.string()).default([]),
+  detection_guidance: z.string().default(""),
+  examples: z.array(MitreExampleRefSchema).default([]),
+  mitigations: z.array(MitreMitigationRefSchema).default([]),
+  created_at: z.string().optional(),
+  updated_at: z.string().optional(),
+});
+
+export const MitreCoverageFilterStatusSchema = z.enum(["all", "covered", "uncovered"]);
+
+export const MitreTechniqueFilterSchema = z.object({
+  tactic_id: z.string().optional(),
+  search: z.string().max(256).optional(),
+  coverage_status: MitreCoverageFilterStatusSchema.optional().default("all"),
+  platform: z.string().optional(),
+  is_subtechnique: z.boolean().optional(),
+  page: z.number().int().min(1).optional().default(1),
+  pageSize: z.number().int().min(1).max(200).optional().default(50),
+});
+
+export const MitreTenantMappingSchema = z.object({
+  id: z.string().uuid().optional(),
+  organization_id: z.string().uuid("Invalid organization ID format"),
+  technique_external_id: z.string().min(1),
+  coverage_status: z.enum(["covered", "partially_covered", "uncovered"]).default("covered"),
+  custom_notes: z.string().nullable().optional(),
+  created_by: z.string().uuid().nullable().optional(),
+});
+
+export type MitreTacticInput = z.infer<typeof MitreTacticSchema>;
+export type MitreTechniqueInput = z.infer<typeof MitreTechniqueSchema>;
+export type MitreTechniqueFilterInput = z.infer<typeof MitreTechniqueFilterSchema>;
+export type MitreTenantMappingInput = z.infer<typeof MitreTenantMappingSchema>;
+
+
 

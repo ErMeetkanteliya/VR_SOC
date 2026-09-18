@@ -1406,3 +1406,116 @@ export interface SimulateXdrScenarioInput {
   targetIdentityId?: string;
 }
 
+// ==============================================================================
+// Phase 19: MITRE ATT&CK Intelligence & Entity Layer
+// ==============================================================================
+
+export type MitreTacticId =
+  | "TA0043" // Reconnaissance
+  | "TA0042" // Resource Development
+  | "TA0001" // Initial Access
+  | "TA0002" // Execution
+  | "TA0003" // Persistence
+  | "TA0004" // Privilege Escalation
+  | "TA0005" // Defense Evasion
+  | "TA0006" // Credential Access
+  | "TA0007" // Discovery
+  | "TA0008" // Lateral Movement
+  | "TA0009" // Collection
+  | "TA0011" // Command and Control
+  | "TA0010" // Exfiltration
+  | "TA0040"; // Impact
+
+export interface MitreTactic {
+  id: string;
+  external_id: MitreTacticId | string;
+  name: string;
+  description: string;
+  order_index: number;
+  technique_count?: number;
+}
+
+export interface MitreMitigationRef {
+  external_id: string;
+  name: string;
+  description: string;
+}
+
+export interface MitreExampleRef {
+  source_or_actor: string;
+  description: string;
+  reference_url?: string;
+}
+
+export interface MitreTechnique {
+  id: string;
+  external_id: string; // e.g. T1059 or T1059.001
+  name: string;
+  description: string;
+  tactic_external_id: MitreTacticId | string;
+  tactic_name: string;
+  is_subtechnique: boolean;
+  parent_technique_id?: string | null;
+  platforms: string[];
+  data_sources: string[];
+  detection_guidance: string;
+  examples: MitreExampleRef[];
+  mitigations: MitreMitigationRef[];
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface MitreTacticCoverage {
+  tactic_id: string;
+  tactic_name: string;
+  total_techniques: number;
+  covered_techniques: number;
+  coverage_percentage: number;
+  mapped_rules_count: number;
+}
+
+export interface MitreCoverageStats {
+  total_techniques: number;
+  covered_techniques: number;
+  uncovered_techniques: number;
+  coverage_percentage: number;
+  total_rules_mapped: number;
+  tactic_breakdown: Record<string, MitreTacticCoverage>;
+  subtechnique_coverage: {
+    total: number;
+    covered: number;
+    percentage: number;
+  };
+}
+
+export type MitreCoverageFilterStatus = "all" | "covered" | "uncovered";
+
+export interface MitreTechniqueFilter {
+  tactic_id?: string;
+  search?: string;
+  coverage_status?: MitreCoverageFilterStatus;
+  platform?: string;
+  is_subtechnique?: boolean;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface MitreTechniqueDetail extends MitreTechnique {
+  sub_techniques: MitreTechnique[];
+  mapped_detection_rules: DetectionRule[];
+  coverage_status: "covered" | "uncovered";
+  mapped_rules_count: number;
+}
+
+export interface MitreTenantMapping {
+  id: string;
+  organization_id: string;
+  technique_external_id: string;
+  coverage_status: "covered" | "partially_covered" | "uncovered";
+  custom_notes?: string | null;
+  created_by?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+
