@@ -1546,5 +1546,126 @@ export type MitreTechniqueInput = z.infer<typeof MitreTechniqueSchema>;
 export type MitreTechniqueFilterInput = z.infer<typeof MitreTechniqueFilterSchema>;
 export type MitreTenantMappingInput = z.infer<typeof MitreTenantMappingSchema>;
 
+// ==============================================================================
+// Phase 20: Threat Intelligence & Canonical IOC Validation Schemas
+// ==============================================================================
+
+export const IocTypeSchema = z.enum(["ip", "domain", "url", "hash", "email", "file"]);
+
+export const IocHashTypeSchema = z.enum(["md5", "sha1", "sha256", "sha512"]);
+
+export const IocIpVersionSchema = z.enum(["v4", "v6"]);
+
+export const IocStatusSchema = z.enum(["active", "deprecated", "whitelisted", "false_positive"]);
+
+export const IocSeveritySchema = z.enum(["critical", "high", "medium", "low", "informational"]);
+
+export const IocSourceSchema = z.enum(["manual", "simulation", "alienvault", "virustotal", "misp", "threatconnect", "feed"]);
+
+export const IocRelationshipTargetTypeSchema = z.enum(["event", "alert", "incident", "case", "asset", "malware"]);
+
+export const IocRelationshipTypeSchema = z.enum([
+  "observed_in",
+  "attributed_to",
+  "targeted_at",
+  "blocked_by",
+  "dropped_by",
+  "communicated_with",
+]);
+
+export const ThreatIndicatorSchema = z.object({
+  id: z.string().uuid("Invalid IOC ID format"),
+  organization_id: z.string().uuid("Invalid organization ID format"),
+  ioc_type: IocTypeSchema,
+  normalized_value: z.string().min(1, "Normalized value is required"),
+  raw_value: z.string().min(1, "Raw value is required"),
+  hash_type: IocHashTypeSchema.nullable().optional(),
+  ip_version: IocIpVersionSchema.nullable().optional(),
+  confidence: z.number().int().min(0).max(100).default(80),
+  severity: IocSeveritySchema.default("medium"),
+  threat_types: z.array(z.string()).default([]),
+  source: z.string().default("manual"),
+  tags: z.array(z.string()).default([]),
+  description: z.string().default(""),
+  first_seen: z.string().datetime().optional(),
+  last_seen: z.string().datetime().optional(),
+  status: IocStatusSchema.default("active"),
+  is_global: z.boolean().default(false),
+  metadata: z.record(z.unknown()).default({}),
+  created_at: z.string().datetime().optional(),
+  updated_at: z.string().datetime().optional(),
+});
+
+export const CreateIocInputSchema = z.object({
+  ioc_type: IocTypeSchema,
+  value: z.string().min(1, "Indicator value is required").max(2048, "Indicator value is too long"),
+  hash_type: IocHashTypeSchema.nullable().optional(),
+  confidence: z.number().int().min(0).max(100).optional().default(80),
+  severity: IocSeveritySchema.optional().default("medium"),
+  threat_types: z.array(z.string().max(64)).optional().default([]),
+  source: z.string().max(64).optional().default("manual"),
+  tags: z.array(z.string().max(64)).optional().default([]),
+  description: z.string().max(2000).optional().default(""),
+  status: IocStatusSchema.optional().default("active"),
+  first_seen: z.string().datetime().optional(),
+  last_seen: z.string().datetime().optional(),
+  metadata: z.record(z.unknown()).optional().default({}),
+});
+
+export const UpdateIocInputSchema = z.object({
+  id: z.string().uuid("Invalid IOC ID format"),
+  confidence: z.number().int().min(0).max(100).optional(),
+  severity: IocSeveritySchema.optional(),
+  threat_types: z.array(z.string().max(64)).optional(),
+  tags: z.array(z.string().max(64)).optional(),
+  description: z.string().max(2000).optional(),
+  status: IocStatusSchema.optional(),
+  last_seen: z.string().datetime().optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+export const IocRelationshipSchema = z.object({
+  id: z.string().uuid().optional(),
+  organization_id: z.string().uuid("Invalid organization ID format"),
+  ioc_id: z.string().uuid("Invalid IOC ID format"),
+  target_type: IocRelationshipTargetTypeSchema,
+  target_id: z.string().min(1, "Target ID is required"),
+  relationship_type: IocRelationshipTypeSchema.default("observed_in"),
+  context: z.record(z.unknown()).default({}),
+  first_seen: z.string().datetime().optional(),
+  last_seen: z.string().datetime().optional(),
+  created_at: z.string().datetime().optional(),
+});
+
+export const CreateIocRelationshipInputSchema = z.object({
+  ioc_id: z.string().uuid("Invalid IOC ID format"),
+  target_type: IocRelationshipTargetTypeSchema,
+  target_id: z.string().min(1, "Target ID is required"),
+  relationship_type: IocRelationshipTypeSchema.optional().default("observed_in"),
+  context: z.record(z.unknown()).optional().default({}),
+});
+
+export const IocFilterSchema = z.object({
+  search: z.string().max(256).optional(),
+  ioc_type: z.union([IocTypeSchema, z.literal("all")]).optional().default("all"),
+  severity: z.union([IocSeveritySchema, z.literal("all")]).optional().default("all"),
+  status: z.union([IocStatusSchema, z.literal("all")]).optional().default("all"),
+  source: z.string().optional().default("all"),
+  threat_type: z.string().optional(),
+  tag: z.string().optional(),
+  page: z.number().int().min(1).optional().default(1),
+  pageSize: z.number().int().min(1).max(200).optional().default(25),
+  sortBy: z.enum(["last_seen", "first_seen", "confidence", "severity", "created_at"]).optional().default("last_seen"),
+  sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
+});
+
+export type ThreatIndicatorInput = z.infer<typeof ThreatIndicatorSchema>;
+export type CreateIocValidationInput = z.infer<typeof CreateIocInputSchema>;
+export type UpdateIocValidationInput = z.infer<typeof UpdateIocInputSchema>;
+export type IocRelationshipValidationInput = z.infer<typeof IocRelationshipSchema>;
+export type CreateIocRelationshipValidationInput = z.infer<typeof CreateIocRelationshipInputSchema>;
+export type IocFilterValidationInput = z.infer<typeof IocFilterSchema>;
+
+
 
 

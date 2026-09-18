@@ -26,6 +26,12 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     "detections:test",
     "mitre:read",
     "mitre:simulate",
+    // Threat Intelligence & IOCs
+    "threat_intel:read",
+    "threat_intel:create",
+    "threat_intel:update",
+    "threat_intel:delete",
+    "threat_intel:relate",
     // Alerts & Incidents
     "alerts:read",
     "alerts:triage",
@@ -82,6 +88,11 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     "detections:test",
     "mitre:read",
     "mitre:simulate",
+    // Threat Intelligence & IOCs
+    "threat_intel:read",
+    "threat_intel:create",
+    "threat_intel:update",
+    "threat_intel:relate",
     // Alerts & Incidents
     "alerts:read",
     "alerts:triage",
@@ -126,6 +137,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     // Detections & MITRE
     "detections:read",
     "mitre:read",
+    // Threat Intelligence & IOCs
+    "threat_intel:read",
     // Alerts & Incidents
     "alerts:read",
     "alerts:triage",
@@ -157,6 +170,12 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     "detections:test",
     "mitre:read",
     "mitre:simulate",
+    // Threat Intelligence & IOCs
+    "threat_intel:read",
+    "threat_intel:create",
+    "threat_intel:update",
+    "threat_intel:delete",
+    "threat_intel:relate",
     // Alerts & Incidents
     "alerts:read",
     "alerts:triage",
@@ -197,6 +216,12 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     "detections:test",
     "mitre:read",
     "mitre:simulate",
+    // Threat Intelligence & IOCs
+    "threat_intel:read",
+    "threat_intel:create",
+    "threat_intel:update",
+    "threat_intel:delete",
+    "threat_intel:relate",
     // Alerts & Incidents
     "alerts:read",
     "alerts:triage",
@@ -245,6 +270,12 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     "detections:test",
     "mitre:read",
     "mitre:simulate",
+    // Threat Intelligence & IOCs
+    "threat_intel:read",
+    "threat_intel:create",
+    "threat_intel:update",
+    "threat_intel:delete",
+    "threat_intel:relate",
     // Alerts & Incidents
     "alerts:read",
     "alerts:triage",
@@ -280,6 +311,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     // Detections & MITRE
     "detections:read",
     "mitre:read",
+    // Threat Intelligence & IOCs
+    "threat_intel:read",
     // Alerts & Incidents
     "alerts:read",
     // Incidents & Cases
@@ -303,6 +336,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     // Detections & MITRE
     "detections:read",
     "mitre:read",
+    // Threat Intelligence & IOCs
+    "threat_intel:read",
     // Alerts & Incidents
     "alerts:read",
     // SOAR & Automation

@@ -47,6 +47,9 @@ test.describe("Phase 19: MITRE ATT&CK Center E2E", () => {
 
       // Verify filtered result contains T1059.001
       await expect(page.getByText("T1059.001").first()).toBeVisible();
+
+      // Clear search for subsequent tests
+      await searchInput.fill("");
     });
 
     test("4. Opens Technique Forensic Drawer and inspects mitigations and pivots", async ({

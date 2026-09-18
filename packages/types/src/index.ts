@@ -37,6 +37,12 @@ export type Permission =
   | "detections:test"
   | "mitre:read"
   | "mitre:simulate"
+  // Threat Intelligence & IOCs
+  | "threat_intel:read"
+  | "threat_intel:create"
+  | "threat_intel:update"
+  | "threat_intel:delete"
+  | "threat_intel:relate"
   // Alerts & Incidents
   | "alerts:read"
   | "alerts:triage"
@@ -1517,5 +1523,140 @@ export interface MitreTenantMapping {
   created_at: string;
   updated_at: string;
 }
+
+// ==============================================================================
+// Phase 20: Threat Intelligence & Canonical IOC Entity Layer Types
+// ==============================================================================
+
+export type IocType = "ip" | "domain" | "url" | "hash" | "email" | "file";
+
+export type IocHashType = "md5" | "sha1" | "sha256" | "sha512";
+
+export type IocIpVersion = "v4" | "v6";
+
+export type IocStatus = "active" | "deprecated" | "whitelisted" | "false_positive";
+
+export type IocSeverity = "critical" | "high" | "medium" | "low" | "informational";
+
+export type IocSource = "manual" | "simulation" | "alienvault" | "virustotal" | "misp" | "threatconnect" | "feed";
+
+export type IocRelationshipTargetType = "event" | "alert" | "incident" | "case" | "asset" | "malware";
+
+export type IocRelationshipType =
+  | "observed_in"
+  | "attributed_to"
+  | "targeted_at"
+  | "blocked_by"
+  | "dropped_by"
+  | "communicated_with";
+
+export interface ThreatIndicator {
+  id: string;
+  organization_id: string;
+  ioc_type: IocType;
+  normalized_value: string;
+  raw_value: string;
+  hash_type?: IocHashType | null;
+  ip_version?: IocIpVersion | null;
+  confidence: number;
+  severity: IocSeverity;
+  threat_types: string[];
+  source: IocSource | string;
+  tags: string[];
+  description: string;
+  first_seen: string;
+  last_seen: string;
+  status: IocStatus;
+  is_global: boolean;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface IocRelationship {
+  id: string;
+  organization_id: string;
+  ioc_id: string;
+  target_type: IocRelationshipTargetType;
+  target_id: string;
+  relationship_type: IocRelationshipType;
+  context: Record<string, unknown>;
+  first_seen: string;
+  last_seen: string;
+  created_at: string;
+}
+
+export interface ThreatIndicatorDetail extends ThreatIndicator {
+  relationships: IocRelationship[];
+  relationships_count: {
+    events: number;
+    alerts: number;
+    incidents: number;
+    cases: number;
+    assets: number;
+    malware: number;
+  };
+}
+
+export interface IocFilter {
+  search?: string;
+  ioc_type?: IocType | "all";
+  severity?: IocSeverity | "all";
+  status?: IocStatus | "all";
+  source?: string | "all";
+  threat_type?: string;
+  tag?: string;
+  page?: number;
+  pageSize?: number;
+  sortBy?: "last_seen" | "first_seen" | "confidence" | "severity" | "created_at";
+  sortOrder?: "asc" | "desc";
+}
+
+export interface IocOverviewStats {
+  total_iocs: number;
+  active_iocs: number;
+  critical_high_count: number;
+  total_sightings: number;
+  by_type: Record<IocType, number>;
+  by_severity: Record<IocSeverity, number>;
+  by_status: Record<IocStatus, number>;
+}
+
+export interface CreateIocInput {
+  ioc_type: IocType;
+  value: string;
+  hash_type?: IocHashType | null;
+  confidence?: number;
+  severity?: IocSeverity;
+  threat_types?: string[];
+  source?: IocSource | string;
+  tags?: string[];
+  description?: string;
+  status?: IocStatus;
+  first_seen?: string;
+  last_seen?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateIocInput {
+  id: string;
+  confidence?: number;
+  severity?: IocSeverity;
+  threat_types?: string[];
+  tags?: string[];
+  description?: string;
+  status?: IocStatus;
+  last_seen?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface CreateIocRelationshipInput {
+  ioc_id: string;
+  target_type: IocRelationshipTargetType;
+  target_id: string;
+  relationship_type?: IocRelationshipType;
+  context?: Record<string, unknown>;
+}
+
 
 
