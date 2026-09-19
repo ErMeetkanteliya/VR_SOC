@@ -1735,10 +1735,171 @@ export const CreateHuntNoteInputSchema = z.object({
 
 export type HuntQueryValidationInput = z.infer<typeof HuntQueryInputSchema>;
 export type CreateHuntSessionValidationInput = z.infer<typeof CreateHuntSessionInputSchema>;
-export type CreateHuntEvidenceValidationInput = z.infer<typeof CreateHuntEvidenceInputSchema>;
-export type CreateHuntNoteValidationInput = z.infer<typeof CreateHuntNoteInputSchema>;
+// ------------------------------------------------------------------------------
+// Phase 22 Incident Response Validation Schemas
+// ------------------------------------------------------------------------------
 
+export const IncidentStageSchema = z.enum([
+  "Detection",
+  "Analysis",
+  "Containment",
+  "Eradication",
+  "Recovery",
+  "Lessons Learned",
+  "Closed",
+]);
 
+export const IncidentPrioritySchema = z.enum([
+  "P1",
+  "P2",
+  "P3",
+  "P4",
+  "Critical",
+  "High",
+  "Medium",
+  "Low",
+]);
 
+export const IncidentStatusSchema = z.enum([
+  "Open",
+  "In Progress",
+  "Contained",
+  "Resolved",
+  "Closed",
+  "open",
+  "in_progress",
+  "contained",
+  "resolved",
+  "closed",
+]);
 
+export const IncidentTaskStatusSchema = z.enum([
+  "pending",
+  "in_progress",
+  "completed",
+  "skipped",
+]);
 
+export const IncidentEvidenceTypeSchema = z.enum([
+  "alert",
+  "event",
+  "process",
+  "socket",
+  "registry",
+  "ioc",
+  "hunt_evidence",
+  "file",
+]);
+
+export const IncidentFilterParamsSchema = z.object({
+  search: z.string().max(255).optional(),
+  stage: z.union([IncidentStageSchema, z.literal("all")]).optional().default("all"),
+  severity: z.union([SeverityLevelSchema, z.literal("all")]).optional().default("all"),
+  priority: z.union([IncidentPrioritySchema, z.literal("all")]).optional().default("all"),
+  status: z.union([IncidentStatusSchema, z.literal("all")]).optional().default("all"),
+  assigned_to: z.string().max(128).optional(),
+  page: z.number().int().min(1).optional().default(1),
+  pageSize: z.number().int().min(1).max(100).optional().default(20),
+});
+
+export const CreateIncidentInputSchema = z.object({
+  title: z.string().min(1, "Title is required").max(255),
+  description: z.string().max(4000).optional(),
+  severity: SeverityLevelSchema.optional().default("High"),
+  priority: IncidentPrioritySchema.optional().default("P2"),
+  stage: IncidentStageSchema.optional().default("Detection"),
+  playbook_id: z.string().max(64).optional(),
+  source_alert_id: z.string().uuid().optional(),
+  source_alert_ids: z.array(z.string()).optional().default([]),
+  assigned_to: z.string().uuid().optional(),
+  assignee_name: z.string().max(128).optional(),
+  affected_assets: z.array(z.string().max(128)).optional().default([]),
+  affected_identities: z.array(z.string().max(128)).optional().default([]),
+  mitre_tactics: z.array(z.string().max(128)).optional().default([]),
+  mitre_techniques: z.array(z.string().max(64)).optional().default([]),
+});
+
+export const DeclareIncidentFromAlertInputSchema = z.object({
+  alert_id: z.string().min(1, "Alert ID is required"),
+  title: z.string().max(255).optional(),
+  severity: SeverityLevelSchema.optional(),
+  priority: IncidentPrioritySchema.optional().default("P2"),
+  playbook_id: z.string().max(64).optional(),
+  assigned_to: z.string().uuid().optional(),
+  assignee_name: z.string().max(128).optional(),
+  rationale: z.string().max(2000).optional(),
+});
+
+export const UpdateIncidentInputSchema = z.object({
+  title: z.string().min(1).max(255).optional(),
+  description: z.string().max(4000).optional(),
+  severity: SeverityLevelSchema.optional(),
+  priority: IncidentPrioritySchema.optional(),
+  status: IncidentStatusSchema.optional(),
+  assigned_to: z.string().uuid().nullable().optional(),
+  assignee_name: z.string().max(128).nullable().optional(),
+  affected_assets: z.array(z.string().max(128)).optional(),
+  affected_identities: z.array(z.string().max(128)).optional(),
+  mitre_tactics: z.array(z.string().max(128)).optional(),
+  mitre_techniques: z.array(z.string().max(64)).optional(),
+  playbook_id: z.string().max(64).nullable().optional(),
+  playbook_name: z.string().max(255).nullable().optional(),
+});
+
+export const TransitionIncidentStageInputSchema = z.object({
+  incident_id: z.string().min(1, "Incident ID is required"),
+  new_stage: IncidentStageSchema,
+  rationale: z.string().max(2000).optional(),
+  actor_name: z.string().max(128).optional(),
+});
+
+export const CreateIncidentTaskInputSchema = z.object({
+  incident_id: z.string().min(1, "Incident ID is required"),
+  stage: IncidentStageSchema,
+  title: z.string().min(1, "Task title is required").max(255),
+  description: z.string().max(2000).optional(),
+  assigned_to: z.string().max(128).optional(),
+  order_index: z.number().int().min(0).optional().default(0),
+});
+
+export const UpdateIncidentTaskInputSchema = z.object({
+  id: z.string().min(1, "Task ID is required"),
+  status: IncidentTaskStatusSchema.optional(),
+  completed_by: z.string().max(128).optional(),
+  notes: z.string().max(2000).optional(),
+  assigned_to: z.string().max(128).optional(),
+});
+
+export const CreateIncidentEvidenceInputSchema = z.object({
+  incident_id: z.string().min(1, "Incident ID is required"),
+  target_type: IncidentEvidenceTypeSchema,
+  target_id: z.string().min(1, "Target ID is required").max(255),
+  summary: z.string().min(1, "Summary is required").max(500),
+  description: z.string().max(2000).optional(),
+  confidence: z.number().int().min(0).max(100).optional().default(90),
+  metadata: z.record(z.unknown()).optional().default({}),
+});
+
+export const CreateIncidentNoteInputSchema = z.object({
+  incident_id: z.string().min(1, "Incident ID is required"),
+  content: z.string().min(1, "Content is required").max(5000),
+  tags: z.array(z.string().max(64)).optional().default([]),
+});
+
+export const CloseIncidentInputSchema = z.object({
+  incident_id: z.string().min(1, "Incident ID is required"),
+  closure_reason: z.string().min(1, "Closure reason is required").max(500),
+  closure_notes: z.string().max(4000).optional(),
+  actor_name: z.string().max(128).optional(),
+});
+
+export type IncidentFilterValidationInput = z.infer<typeof IncidentFilterParamsSchema>;
+export type CreateIncidentValidationInput = z.infer<typeof CreateIncidentInputSchema>;
+export type DeclareIncidentValidationInput = z.infer<typeof DeclareIncidentFromAlertInputSchema>;
+export type UpdateIncidentValidationInput = z.infer<typeof UpdateIncidentInputSchema>;
+export type TransitionIncidentStageValidationInput = z.infer<typeof TransitionIncidentStageInputSchema>;
+export type CreateIncidentTaskValidationInput = z.infer<typeof CreateIncidentTaskInputSchema>;
+export type UpdateIncidentTaskValidationInput = z.infer<typeof UpdateIncidentTaskInputSchema>;
+export type CreateIncidentEvidenceValidationInput = z.infer<typeof CreateIncidentEvidenceInputSchema>;
+export type CreateIncidentNoteValidationInput = z.infer<typeof CreateIncidentNoteInputSchema>;
+export type CloseIncidentValidationInput = z.infer<typeof CloseIncidentInputSchema>;

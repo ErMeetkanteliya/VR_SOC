@@ -12,6 +12,7 @@ import {
   Send,
   UserCheck,
   History,
+  Flame,
 } from "lucide-react";
 import type {
   Alert,
@@ -28,6 +29,7 @@ import {
   addAlertNoteAction,
   closeAlertAction,
 } from "@/lib/alerts/actions";
+import { declareIncidentFromAlertAction } from "@/lib/incident-response/actions";
 
 interface AlertTriageDrawerProps {
   isOpen: boolean;
@@ -157,6 +159,28 @@ export function AlertTriageDrawer({
         setTriageNote("");
       } else {
         setActionFeedback(res.error || "Failed to assign analyst.");
+      }
+    } catch (err: any) {
+      setActionFeedback(err.message || "An unexpected error occurred.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeclareIncident = async () => {
+    setIsSubmitting(true);
+    setActionFeedback(null);
+    try {
+      const res = await declareIncidentFromAlertAction({
+        alert_id: alert.id,
+        title: `Incident: Escalation from ${alert.alert_code || alert.id}`,
+        severity: alert.severity,
+        rationale: triageNote || `Formal incident declared from alert triage: ${alert.title}`,
+      });
+      if (res.success && res.data) {
+        setActionFeedback(`Formal incident ${res.data.incident_code} declared successfully.`);
+      } else {
+        setActionFeedback(res.error || "Failed to declare incident.");
       }
     } catch (err: any) {
       setActionFeedback(err.message || "An unexpected error occurred.");
@@ -607,6 +631,27 @@ export function AlertTriageDrawer({
                 className="text-xs border-purple-500/30 text-purple-300 hover:bg-purple-950/30"
               >
                 Assign Analyst
+              </Button>
+            </div>
+
+            {/* Declare Formal Incident */}
+            <div className="p-3.5 rounded-lg bg-red-950/20 border border-red-500/20 space-y-2.5">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-red-300 flex items-center gap-1.5">
+                <Flame className="w-3.5 h-3.5 text-red-400" />
+                Declare Formal Incident
+              </h4>
+              <p className="text-xs text-neutral-400">
+                Escalate this alert into an active Incident Response dossier with NIST lifecycle tracking and playbook checklists.
+              </p>
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={handleDeclareIncident}
+                disabled={isSubmitting}
+                className="bg-red-600 hover:bg-red-500 text-white text-xs border-red-500/30 shadow-md shadow-red-600/20 gap-1.5"
+              >
+                <Flame className="w-3.5 h-3.5" />
+                <span>Declare Incident from Alert</span>
               </Button>
             </div>
           </div>

@@ -58,6 +58,11 @@ export type Permission =
   | "incidents:create"
   | "incidents:update_status"
   | "incidents:assign"
+  | "incidents:stage"
+  | "incidents:task"
+  | "incidents:note"
+  | "incidents:evidence"
+  | "incidents:playbook"
   | "incidents:close"
   // Cases & Evidence
   | "cases:read"
@@ -519,17 +524,271 @@ export interface CreateAlertFromDetectionInput {
   rule?: DetectionRule;
 }
 
+// ------------------------------------------------------------------------------
+// Phase 22 Incident Response Domain Types
+// ------------------------------------------------------------------------------
+
+export type IncidentPriority = "P1" | "P2" | "P3" | "P4" | "Critical" | "High" | "Medium" | "Low";
+
+export type IncidentStatus =
+  | "Open"
+  | "In Progress"
+  | "Contained"
+  | "Resolved"
+  | "Closed"
+  | "open"
+  | "in_progress"
+  | "contained"
+  | "resolved"
+  | "closed";
+
+export type IncidentTaskStatus = "pending" | "in_progress" | "completed" | "skipped";
+
+export type IncidentEvidenceType =
+  | "alert"
+  | "event"
+  | "process"
+  | "socket"
+  | "registry"
+  | "ioc"
+  | "hunt_evidence"
+  | "file";
+
+export interface IncidentPlaybookTask {
+  id: string;
+  stage: IncidentStage;
+  title: string;
+  description: string;
+  order_index: number;
+}
+
+export interface IncidentPlaybook {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  mitre_techniques: string[];
+  default_tasks: IncidentPlaybookTask[];
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface IncidentTask {
+  id: string;
+  organization_id: string;
+  incident_id: string;
+  playbook_id?: string | null;
+  stage: IncidentStage;
+  title: string;
+  description?: string | null;
+  status: IncidentTaskStatus;
+  order_index: number;
+  assigned_to?: string | null;
+  completed_at?: string | null;
+  completed_by?: string | null;
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface IncidentHistoryItem {
+  id: string;
+  organization_id: string;
+  incident_id: string;
+  actor_name: string;
+  action_type:
+    | "declared"
+    | "stage_transition"
+    | "status_change"
+    | "assignment"
+    | "task_update"
+    | "evidence_attached"
+    | "note_added"
+    | "closed";
+  previous_stage?: IncidentStage | null;
+  new_stage?: IncidentStage | null;
+  rationale?: string | null;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface IncidentEvidence {
+  id: string;
+  organization_id: string;
+  incident_id: string;
+  target_type: IncidentEvidenceType;
+  target_id: string;
+  summary: string;
+  description?: string | null;
+  confidence: number;
+  metadata?: Record<string, unknown>;
+  added_by: string;
+  created_at: string;
+}
+
+export interface IncidentNote {
+  id: string;
+  organization_id: string;
+  incident_id: string;
+  author_id?: string | null;
+  author_name: string;
+  content: string;
+  tags: string[];
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Incident {
   id: string;
   organization_id: string;
-  incident_number: string;
+  incident_code: string;
+  incident_number?: string;
   title: string;
-  summary: string;
+  description?: string | null;
+  summary?: string;
   severity: SeverityLevel;
+  priority: IncidentPriority;
   stage: IncidentStage;
-  lead_responder_id?: string;
+  status: IncidentStatus;
+  source_alert_id?: string | null;
+  source_alert?: Alert | null;
+  source_alert_ids: string[];
+  assigned_to?: string | null;
+  assignee_name?: string | null;
+  lead_responder_id?: string | null;
+  lead_responder_name?: string | null;
+  affected_assets: string[];
+  affected_identities: string[];
+  mitre_tactics: string[];
+  mitre_techniques: string[];
+  playbook_id?: string | null;
+  playbook_name?: string | null;
+  stage_timestamps: Partial<Record<IncidentStage, string>>;
   declared_at: string;
-  closed_at?: string;
+  closed_at?: string | null;
+  closure_reason?: string | null;
+  closure_notes?: string | null;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+  // Computed aggregations for UI
+  tasks_total?: number;
+  tasks_completed?: number;
+  evidence_count?: number;
+  notes_count?: number;
+}
+
+export interface IncidentFilterParams {
+  search?: string;
+  stage?: IncidentStage | "all";
+  severity?: SeverityLevel | "all";
+  priority?: IncidentPriority | "all";
+  status?: IncidentStatus | "all";
+  assigned_to?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface IncidentOverviewStats {
+  total_incidents: number;
+  active_incidents: number;
+  critical_p1: number;
+  in_containment: number;
+  resolved_today: number;
+  avg_mttc_hours: number;
+  avg_mttr_hours: number;
+}
+
+export interface CreateIncidentInput {
+  title: string;
+  description?: string;
+  severity?: SeverityLevel;
+  priority?: IncidentPriority;
+  stage?: IncidentStage;
+  playbook_id?: string;
+  source_alert_id?: string;
+  source_alert_ids?: string[];
+  assigned_to?: string;
+  assignee_name?: string;
+  affected_assets?: string[];
+  affected_identities?: string[];
+  mitre_tactics?: string[];
+  mitre_techniques?: string[];
+}
+
+export interface DeclareIncidentFromAlertInput {
+  alert_id: string;
+  title?: string;
+  severity?: SeverityLevel;
+  priority?: IncidentPriority;
+  playbook_id?: string;
+  assigned_to?: string;
+  assignee_name?: string;
+  rationale?: string;
+}
+
+export interface UpdateIncidentInput {
+  title?: string;
+  description?: string;
+  severity?: SeverityLevel;
+  priority?: IncidentPriority;
+  status?: IncidentStatus;
+  assigned_to?: string | null;
+  assignee_name?: string | null;
+  affected_assets?: string[];
+  affected_identities?: string[];
+  mitre_tactics?: string[];
+  mitre_techniques?: string[];
+  playbook_id?: string | null;
+  playbook_name?: string | null;
+}
+
+export interface TransitionIncidentStageInput {
+  incident_id: string;
+  new_stage: IncidentStage;
+  rationale?: string;
+  actor_name?: string;
+}
+
+export interface CreateIncidentTaskInput {
+  incident_id: string;
+  stage: IncidentStage;
+  title: string;
+  description?: string;
+  assigned_to?: string;
+  order_index?: number;
+}
+
+export interface UpdateIncidentTaskInput {
+  id: string;
+  status?: IncidentTaskStatus;
+  completed_by?: string;
+  notes?: string;
+  assigned_to?: string;
+}
+
+export interface CreateIncidentEvidenceInput {
+  incident_id: string;
+  target_type: IncidentEvidenceType;
+  target_id: string;
+  summary: string;
+  description?: string;
+  confidence?: number;
+  metadata?: Record<string, unknown>;
+}
+
+export interface CreateIncidentNoteInput {
+  incident_id: string;
+  content: string;
+  tags?: string[];
+}
+
+export interface CloseIncidentInput {
+  incident_id: string;
+  closure_reason: string;
+  closure_notes?: string;
+  actor_name?: string;
 }
 
 // ------------------------------------------------------------------------------
