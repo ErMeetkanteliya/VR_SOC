@@ -32,6 +32,17 @@ async function withTimeout<T>(promise: Promise<T>, ms = 3500): Promise<T> {
   return Promise.race([promise, timeout]);
 }
 
+import { cookies } from "next/headers";
+import {
+  isDevAuthAllowed,
+  validateDevCredentials,
+  getDevAdminUser,
+  DEV_SESSION_COOKIE,
+  DEV_ACTIVE_ORG_COOKIE,
+  DEV_ORG_ID,
+  DEV_ADMIN_DEFAULT_EMAIL,
+} from "./dev-auth";
+
 /**
  * Log in with email and password
  */
@@ -44,6 +55,44 @@ export async function loginAction(input: LoginInput): Promise<AuthActionResult> 
     };
   }
 
+  // 1. Development-Only Super Admin Authentication Path
+  if (isDevAuthAllowed()) {
+    const configuredDevEmail = (process.env.DEV_ADMIN_EMAIL || DEV_ADMIN_DEFAULT_EMAIL).trim().toLowerCase();
+    const inputEmail = parsed.data.email.trim().toLowerCase();
+
+    if (inputEmail === configuredDevEmail) {
+      const isValid = validateDevCredentials(parsed.data.email, parsed.data.password);
+      if (!isValid) {
+        return {
+          success: false,
+          error: "Invalid email or password",
+        };
+      }
+
+      // Set Dev Session Cookies
+      const cookieStore = cookies();
+      cookieStore.set(DEV_SESSION_COOKIE, "vrsoc-dev-superadmin-token", {
+        path: "/",
+        httpOnly: true,
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24 * 7,
+      });
+      cookieStore.set(DEV_ACTIVE_ORG_COOKIE, DEV_ORG_ID, {
+        path: "/",
+        httpOnly: true,
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24 * 7,
+      });
+
+      const devUser = getDevAdminUser();
+      return {
+        success: true,
+        data: { user: devUser },
+      };
+    }
+  }
+
+  // 2. Standard Supabase Authentication Path
   try {
     const supabase = await createServerSupabaseClient();
     const { data, error } = await withTimeout(
@@ -271,6 +320,15 @@ export async function resetPasswordAction(input: ResetPasswordInput): Promise<Au
  * Log out and clear session cookies
  */
 export async function logoutAction(): Promise<void> {
+  try {
+    const cookieStore = cookies();
+    cookieStore.set(DEV_SESSION_COOKIE, "", { path: "/", maxAge: 0 });
+    cookieStore.set(DEV_ACTIVE_ORG_COOKIE, "", { path: "/", maxAge: 0 });
+    cookieStore.set("vrsoc_e2e_session", "", { path: "/", maxAge: 0 });
+  } catch {
+    // Silent catch
+  }
+
   try {
     const supabase = await createServerSupabaseClient();
     await supabase.auth.signOut();

@@ -62,11 +62,13 @@ export function AppShellWrapper({
       userEmail={userEmail}
       userRole={userRole || "Super Admin"}
       commandItems={commandItems}
-      onLogout={() => {
-        const form = document.createElement("form");
-        form.action = "/login";
-        form.method = "POST";
-        logoutAction();
+      onLogout={async () => {
+        try {
+          await logoutAction();
+        } catch {
+          // In Next.js redirect() throws NEXT_REDIRECT, which is expected
+        }
+        window.location.href = "/login";
       }}
     >
       {children}

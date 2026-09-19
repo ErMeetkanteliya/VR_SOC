@@ -57,9 +57,6 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Authenticate user with server
-  const { data: { user } } = await supabase.auth.getUser();
-
   const pathname = request.nextUrl.pathname;
 
   // List of public routes that do not require authentication
@@ -77,8 +74,21 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/_next") ||
     pathname.includes(".");
 
-  const isE2ESession = request.cookies.get("vrsoc_e2e_session")?.value;
-  const isAuthenticated = !!user || !!isE2ESession;
+  const isDevSession = process.env.NODE_ENV !== "production" && Boolean(request.cookies.get("vrsoc_dev_session")?.value);
+  const isE2ESession = Boolean(request.cookies.get("vrsoc_e2e_session")?.value);
+
+  // Authenticate user with Supabase server if not already in dev/e2e session
+  let user = null;
+  if (!isDevSession && !isE2ESession) {
+    try {
+      const { data } = await supabase.auth.getUser();
+      user = data?.user ?? null;
+    } catch {
+      // Offline / network fallback
+    }
+  }
+
+  const isAuthenticated = !!user || isDevSession || isE2ESession;
 
   // 1. Unauthenticated user trying to access a protected route
   if (!isAuthenticated && !isPublicAuthRoute && !isPublicStaticOrApi) {

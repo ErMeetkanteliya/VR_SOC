@@ -16,6 +16,12 @@ export interface TenantActionResult<T = any> {
   data?: T;
 }
 
+import {
+  hasActiveDevSession,
+  getDevAdminOrganization,
+  getDevAdminMemberships,
+} from "@/lib/auth/dev-auth";
+
 const ACTIVE_ORG_COOKIE = "vrsoc_active_org";
 
 /**
@@ -23,6 +29,13 @@ const ACTIVE_ORG_COOKIE = "vrsoc_active_org";
  */
 export async function getActiveOrganization(): Promise<{ organization: Organization | null; role: UserRole | null }> {
   try {
+    if (hasActiveDevSession()) {
+      return {
+        organization: getDevAdminOrganization(),
+        role: "Super Admin" as UserRole,
+      };
+    }
+
     const supabase = await createServerSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -30,14 +43,7 @@ export async function getActiveOrganization(): Promise<{ organization: Organizat
       const e2eSession = cookies().get("vrsoc_e2e_session")?.value;
       if (e2eSession) {
         return {
-          organization: {
-            id: "org-cyber-defense-academy",
-            name: "Cyber Defense Academy",
-            slug: "cyber-defense-academy",
-            status: "active",
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
+          organization: getDevAdminOrganization(),
           role: "Super Admin" as UserRole,
         };
       }
@@ -198,6 +204,13 @@ export async function switchOrganizationAction(organizationId: string): Promise<
  */
 export async function listUserOrganizationsAction(): Promise<TenantActionResult<Membership[]>> {
   try {
+    if (hasActiveDevSession()) {
+      return {
+        success: true,
+        data: getDevAdminMemberships(),
+      };
+    }
+
     const supabase = await createServerSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -206,42 +219,7 @@ export async function listUserOrganizationsAction(): Promise<TenantActionResult<
       if (e2eSession) {
         return {
           success: true,
-          data: [
-            {
-              id: "mem-01",
-              organization_id: "org-cyber-defense-academy",
-              user_id: "usr-e2e-superadmin-01",
-              role: "Super Admin" as UserRole,
-              status: "active",
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-              organization: {
-                id: "org-cyber-defense-academy",
-                name: "Cyber Defense Academy",
-                slug: "cyber-defense-academy",
-                status: "active",
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              },
-            },
-            {
-              id: "mem-02",
-              organization_id: "org-fintech-global",
-              user_id: "usr-e2e-superadmin-01",
-              role: "SOC Analyst" as UserRole,
-              status: "active",
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-              organization: {
-                id: "org-fintech-global",
-                name: "FinTech Global SOC",
-                slug: "fintech-global-soc",
-                status: "active",
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              },
-            },
-          ] as unknown as Membership[],
+          data: getDevAdminMemberships(),
         };
       }
       return { success: false, error: "Not authenticated" };

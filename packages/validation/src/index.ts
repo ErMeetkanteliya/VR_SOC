@@ -774,6 +774,8 @@ export const ServerEnvSchema = ClientEnvSchema.extend({
   SHODAN_API_KEY: z.string().optional(),
   GEMINI_API_KEY: z.string().optional(),
   ANTHROPIC_API_KEY: z.string().optional(),
+  DEV_ADMIN_EMAIL: z.string().email().optional(),
+  DEV_ADMIN_PASSWORD: z.string().min(8).optional(),
 });
 
 export type LoginInput = z.infer<typeof LoginSchema>;

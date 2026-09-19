@@ -163,22 +163,24 @@ export function Topbar({
                 </div>
 
                 {/* Logout Trigger */}
-                {onLogout && (
-                  <div className="border-t border-white/10 pt-1">
-                    <button
-                      type="button"
-                      role="menuitem"
-                      onClick={() => {
-                        setIsUserMenuOpen(false);
+                <div className="border-t border-white/10 pt-1">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      if (onLogout) {
                         onLogout();
-                      }}
-                      className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs text-red-400 hover:bg-red-500/10 transition-colors text-left"
-                    >
-                      <LogOut className="w-3.5 h-3.5 text-red-400" />
-                      <span>Sign out</span>
-                    </button>
-                  </div>
-                )}
+                      } else if (typeof window !== "undefined") {
+                        window.location.href = "/login";
+                      }
+                    }}
+                    className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs text-red-400 hover:bg-red-500/10 transition-colors text-left cursor-pointer"
+                  >
+                    <LogOut className="w-3.5 h-3.5 text-red-400" />
+                    <span>Sign out</span>
+                  </button>
+                </div>
               </div>
             </>
           )}

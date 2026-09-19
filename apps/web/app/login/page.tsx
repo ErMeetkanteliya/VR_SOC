@@ -2,14 +2,13 @@
 
 import React, { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { loginAction } from "@/lib/auth/actions";
 import { Button } from "@vrsoc/ui";
 import { Mail, Lock, AlertCircle, Shield } from "lucide-react";
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get("redirect") || "/";
 
@@ -31,8 +30,7 @@ function LoginForm() {
         return;
       }
 
-      router.push(redirectPath);
-      router.refresh();
+      window.location.href = redirectPath;
     } catch {
       setErrorMessage("Authentication failed. Please check your network and try again.");
       setIsLoading(false);

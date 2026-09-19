@@ -7,13 +7,16 @@ import { RBACDashboardControls } from "@/components/rbac/RBACDashboardControls";
 import { AppShellWrapper } from "@/components/shell/AppShellWrapper";
 import Link from "next/link";
 
+import { hasActiveDevSession } from "@/lib/auth/dev-auth";
+
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const userEmail = user?.email || "analyst@vrsoc.app";
+  const isDev = hasActiveDevSession();
+  const userEmail = user?.email || (isDev ? (process.env.DEV_ADMIN_EMAIL || "dev-admin@vrsoc.local") : "analyst@vrsoc.app");
 
   const { organization: activeOrg, role: activeRole } = await getActiveOrganization();
   const membershipsResult = await listUserOrganizationsAction();

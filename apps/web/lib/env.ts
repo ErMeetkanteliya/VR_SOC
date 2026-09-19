@@ -37,6 +37,8 @@ export function getServerEnv(): ServerEnv {
     SHODAN_API_KEY: process.env.SHODAN_API_KEY,
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+    DEV_ADMIN_EMAIL: process.env.DEV_ADMIN_EMAIL,
+    DEV_ADMIN_PASSWORD: process.env.DEV_ADMIN_PASSWORD,
   });
 
   if (!parsed.success) {

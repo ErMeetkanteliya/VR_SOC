@@ -25,6 +25,12 @@ export interface ServerAuthorizeFailure extends AuthorizeResult {
 
 export type ServerAuthorizeOutput = ServerAuthorizeSuccess | ServerAuthorizeFailure;
 
+import {
+  hasActiveDevSession,
+  DEV_ADMIN_USER_ID,
+  DEV_ORG_ID,
+} from "@/lib/auth/dev-auth";
+
 /**
  * Authoritative Server-Side Authorization Guard.
  * 
@@ -36,6 +42,26 @@ export async function authorizePermission({
   permission,
   supabase: customClient,
 }: ServerAuthorizeOptions): Promise<ServerAuthorizeOutput> {
+  // 0. Development-Only Session Authorization
+  if (hasActiveDevSession()) {
+    const role: UserRole = "Super Admin";
+    const isAllowed = hasPermission(role, permission);
+    if (!isAllowed) {
+      return {
+        authorized: false,
+        statusCode: 403,
+        error: `Access denied: Role '${role}' lacks permission '${permission}'.`,
+      };
+    }
+    return {
+      authorized: true,
+      userId: DEV_ADMIN_USER_ID,
+      organizationId: organizationId || DEV_ORG_ID,
+      role,
+      membershipId: "mem-dev-01",
+    };
+  }
+
   const supabase = customClient || (await createServerSupabaseClient());
 
   // 1. Authenticate user identity

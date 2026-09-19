@@ -5,6 +5,8 @@ import { AppShellWrapper } from "./AppShellWrapper";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, EmptyState, Badge } from "@vrsoc/ui";
 import { redirect } from "next/navigation";
 
+import { hasActiveDevSession } from "@/lib/auth/dev-auth";
+
 export interface PlaceholderModulePageProps {
   currentPath: string;
   title: string;
@@ -20,15 +22,20 @@ export async function PlaceholderModulePage({
   description,
   plannedPhase,
 }: PlaceholderModulePageProps) {
-  const supabase = await createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
+  const isDev = hasActiveDevSession();
   const isE2ESession = (await import("next/headers")).cookies().get("vrsoc_e2e_session")?.value;
-  if (!user && !isE2ESession) {
-    redirect("/login");
+
+  let user = null;
+  if (!isDev && !isE2ESession) {
+    const supabase = await createServerSupabaseClient();
+    const res = await supabase.auth.getUser();
+    user = res.data.user;
+    if (!user) {
+      redirect("/login");
+    }
   }
 
-  const userEmail = user?.email || "analyst@vrsoc.app";
+  const userEmail = user?.email || (isDev ? (process.env.DEV_ADMIN_EMAIL || "dev-admin@vrsoc.local") : "analyst@vrsoc.app");
   const { organization: activeOrg, role: activeRole } = await getActiveOrganization();
   const membershipsResult = await listUserOrganizationsAction();
   const memberships = membershipsResult.data || [];
